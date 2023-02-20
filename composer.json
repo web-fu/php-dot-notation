@@ -1,0 +1,35 @@
+{
+  "name": "web-fu/php-dot-notation",
+  "type": "library",
+  "description": "Library that allows to access array and object with strong type support in Dot Notation",
+  "keywords": [
+    "php", "php8", "array", "object", "dot-notation"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Gabriele Manganello",
+      "email": "info@web-fu.it",
+      "homepage": "https://web-fu.it"
+    }
+  ],
+  "require": {
+    "php": "8.0.* || 8.1.* || 8.2.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "WebFu\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "WebFu\\Tests\\": "tests/"
+    }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5",
+    "friendsofphp/php-cs-fixer": "^3.13",
+    "phpstan/phpstan": "^1.9",
+    "vimeo/psalm": "^5.4"
+  }
+}
