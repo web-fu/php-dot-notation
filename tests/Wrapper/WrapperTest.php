@@ -84,4 +84,13 @@ class WrapperTest extends TestCase
             'expected' => false,
         ];
     }
+
+    public function testHasAfterChange(): void
+    {
+        $element = ['foo' => 'string'];
+        $wrapper = new Wrapper($element);
+        $this->assertSame(false, $wrapper->has('bar'));
+        $element['bar'] = 'new';
+        $this->assertSame(true, $wrapper->has('bar'));
+    }
 }

@@ -11,27 +11,16 @@ use stdClass;
 
 class Wrapper
 {
-    /** @var array|int[]|string[] */
-    private array $keys;
-
     /**
      * @param mixed[]|object $element
      */
-    public function __construct(private array|object $element)
+    public function __construct(private array|object &$element)
     {
-        $type = gettype($this->element);
-
-        assert($type === 'array' || $type === 'object');
-
-        $this->keys = match ($type) {
-            'array' => $this->getArrayKeys(),
-            'object' => $this->getObjectKeys(),
-        };
     }
 
     public function has(string|int $key): bool
     {
-        return in_array($key, $this->keys);
+        return in_array($key, $this->getKeys());
     }
 
     /**
@@ -39,7 +28,14 @@ class Wrapper
      */
     public function getKeys(): array
     {
-        return $this->keys;
+        $type = gettype($this->element);
+
+        assert($type === 'array' || $type === 'object');
+
+        return match ($type) {
+            'array' => $this->getArrayKeys(),
+            'object' => $this->getObjectKeys(),
+        };
     }
 
     /**
