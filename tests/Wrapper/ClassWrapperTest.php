@@ -4,41 +4,25 @@ declare(strict_types=1);
 
 namespace WebFu\Tests\Wrapper;
 
-use WebFu\Wrapper\Wrapper;
 use PHPUnit\Framework\TestCase;
+use WebFu\Wrapper\ClassWrapper;
 
-class WrapperTest extends TestCase
+class ClassWrapperTest extends TestCase
 {
     /**
-     * @dataProvider dataProvider
+     * @dataProvider hasDataProvider
      */
-    public function testHas(array|object $element, string|int $key, bool $expected): void
+    public function testHas(object $element, string $key, bool $expected): void
     {
-        $wrapper = new Wrapper($element);
-        $actual = $wrapper->has($key);
-        $this->assertSame($expected, $actual);
+        $wrapper = new ClassWrapper($element);
+        $this->assertSame($expected, $wrapper->has($key));
     }
 
     /**
      * @return iterable<mixed[]>
      */
-    public function dataProvider(): iterable
+    public function hasDataProvider(): iterable
     {
-        yield 'array.key.int' => [
-            'element' => [1],
-            'key' => 0,
-            'expected' => true,
-        ];
-        yield 'array.key.string' => [
-            'element' => ['foo' => 1],
-            'key' => 'foo',
-            'expected' => true,
-        ];
-        yield 'array.key.not-exist' => [
-            'element' => [],
-            'key' => 0,
-            'expected' => false,
-        ];
         yield 'class.property.exists' => [
             'element' => new class () {
                 public string $property;
@@ -85,12 +69,33 @@ class WrapperTest extends TestCase
         ];
     }
 
-    public function testHasAfterChange(): void
+    /**
+     * @dataProvider getDataProvider
+     */
+    public function testGet(object $element, string|int $key, mixed $expected): void
     {
-        $element = ['foo' => 'string'];
-        $wrapper = new Wrapper($element);
-        $this->assertSame(false, $wrapper->has('bar'));
-        $element['bar'] = 'new';
-        $this->assertSame(true, $wrapper->has('bar'));
+        $wrapper = new ClassWrapper($element);
+        $this->assertSame($expected, $wrapper->get($key));
+    }
+
+    public function getDataProvider(): iterable
+    {
+        yield 'class.property' => [
+            'element' => new class () {
+                public string $property = 'foo';
+            },
+            'key' => 'property',
+            'expected' => 'foo',
+        ];
+        yield 'class.method' => [
+            'element' => new class () {
+                public function method(): string
+                {
+                    return 'foo';
+                }
+            },
+            'key' => 'method()',
+            'expected' => 'foo',
+        ];
     }
 }
