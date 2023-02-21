@@ -52,10 +52,12 @@ class Wrapper
      */
     private function getObjectKeys(): array
     {
-        assert($this->element instanceof stdClass);
+        assert(is_object($this->element));
+
         $reflection = new ReflectionClass($this->element);
         $properties = array_map(fn (ReflectionProperty $reflectionProperty) => $reflectionProperty->getName(), $reflection->getProperties(ReflectionProperty::IS_PUBLIC));
         $methods = array_map(fn (ReflectionMethod $reflectionMethod) => $reflectionMethod->getName() . '()', $reflection->getMethods(ReflectionMethod::IS_PUBLIC));
+
         return $properties + $methods;
     }
 }
