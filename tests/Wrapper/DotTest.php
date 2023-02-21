@@ -102,9 +102,38 @@ class DotTest extends TestCase
     }
 
     /**
+     * @dataProvider pathProvider
+     */
+    public function testValidatePath(string $path): void
+    {
+        $element = [];
+        $dot = new Dot($element);
+
+        $this->expectNotToPerformAssertions();
+
+        $dot->validatePath($path);
+    }
+
+    public function pathProvider(): iterable
+    {
+        yield 'numeric_index_path' => ['0'];
+        yield 'literal_index_path' => ['foo'];
+        yield 'method_path' => ['foo()'];
+        yield 'numeric.numeric' => ['0.0'];
+        yield 'numeric.literal' => ['0.bar'];
+        yield 'numeric.method' => ['0.bar()'];
+        yield 'literal.numeric' => ['foo.0'];
+        yield 'literal.literal' => ['foo.bar'];
+        yield 'literal.method' => ['foo.bar()'];
+        yield 'method.numeric' => ['foo().0'];
+        yield 'method.literal' => ['foo().bar'];
+        yield 'method.method' => ['foo().bar()'];
+    }
+
+    /**
      * @dataProvider invalidPathProvider
      */
-    public function testGetInvalidPath(string $wrongPath): void
+    public function testValidatePathInvalid(string $wrongPath): void
     {
         $element = [];
         $dot = new Dot($element);
@@ -112,7 +141,7 @@ class DotTest extends TestCase
         $this->expectException(InvalidPathException::class);
         $this->expectExceptionMessage($wrongPath . ' is not a valid path');
 
-        $dot->get($wrongPath);
+        $dot->validatePath($wrongPath);
     }
 
     public function invalidPathProvider(): iterable

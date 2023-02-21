@@ -44,11 +44,11 @@ final class Dot
         return $next->get(implode($this->separator, $pathTracks));
     }
 
-    private function validatePath(string $path): void
+    public function validatePath(string $path): void
     {
         $separatorEscaped = preg_quote($this->separator);
 
-        preg_match('/([a-zA-Z_][a-zA-Z_0-9]*(\(\))?)('.$separatorEscaped.'[a-zA-Z_][a-zA-Z_0-9]*(\(\))?)*/', $path, $matches);
+        preg_match('/(([a-zA-Z_][a-zA-Z_0-9]*(\(\))?)|([-+]?\d+))('.$separatorEscaped.'(([a-zA-Z_][a-zA-Z_0-9]*(\(\))?)|([-+]?\d+)))*/', $path, $matches);
         if (!count($matches) || $matches[0] !== $path) {
             throw new InvalidPathException($path . ' is not a valid path');
         }
