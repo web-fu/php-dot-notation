@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace WebFu\Dot;
 
-use WebFu\Wrapper\Wrapper;
+use WebFu\Wrapper\WrapperFactory;
+use WebFu\Wrapper\WrapperInterface;
 
 final class Dot
 {
-    private Wrapper $wrapper;
+    private WrapperInterface $wrapper;
 
     /**
      * @param mixed[]|object $element
@@ -16,7 +17,7 @@ final class Dot
      */
     public function __construct(private array|object $element, private string $separator = '.')
     {
-        $this->wrapper = new Wrapper($this->element);
+        $this->wrapper = WrapperFactory::create($this->element);
     }
 
     public function get(string $path): mixed
@@ -30,10 +31,7 @@ final class Dot
             throw new PathNotFoundException($track . ' path not found');
         }
 
-        $value = match (gettype($this->element)) {
-            'array' => $this->element[$track],
-            'object' => $this->element->{$track}
-        };
+        $value = $this->wrapper->get($track);
 
         if (!count($pathTracks)) {
             return $value;

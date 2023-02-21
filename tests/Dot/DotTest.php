@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace WebFu\Tests\Wrapper;
+namespace WebFu\Tests\Dot;
 
 use PHPUnit\Framework\TestCase;
-use WebFu\Dot\Dot;
 use stdClass;
+use WebFu\Dot\Dot;
 use WebFu\Dot\InvalidPathException;
 use WebFu\Dot\PathNotFoundException;
 
@@ -50,6 +50,16 @@ class DotTest extends TestCase
             },
             'path' => 'object',
             'expected' => (object)['test' => 'test'],
+        ];
+        yield 'class.method' => [
+            'element' => new class () {
+                public function method(): int
+                {
+                    return 1;
+                }
+            },
+            'path' => 'method()',
+            'expected' => 1,
         ];
         yield 'class.complex' => [
             'element' => new class () {
