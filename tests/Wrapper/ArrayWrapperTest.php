@@ -50,6 +50,39 @@ class ArrayWrapperTest extends TestCase
     }
 
     /**
+     * @dataProvider getKeysProvider
+     */
+    public function testGetKeys(array $element, array $expected): void
+    {
+        $wrapper = new ArrayWrapper($element);
+        $this->assertSame($expected, $wrapper->getKeys());
+    }
+
+    public function getKeysProvider(): iterable
+    {
+        yield 'numeric.keys' => [
+            'element' => [1, 2, 3],
+            'expected' => [0, 1, 2],
+        ];
+        yield 'numeric.keys.starting_with' => [
+            'element' => [3 => 1, 2, 3],
+            'expected' => [3, 4, 5],
+        ];
+        yield 'numeric.keys.sparse' => [
+            'element' => [3 => 1, -12 => 2, 5 => 3],
+            'expected' => [3, -12, 5],
+        ];
+        yield 'literal.keys' => [
+            'element' => ['foo' => 1, 'bar' => true],
+            'expected' => ['foo', 'bar'],
+        ];
+        yield 'mixed.keys' => [
+            'element' => ['foo' => 1, 'bar'],
+            'expected' => ['foo', 0]
+        ];
+    }
+
+    /**
      * @dataProvider getDataProvider
      */
     public function testGet(array|object $element, string|int $key, mixed $expected): void
