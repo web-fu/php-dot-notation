@@ -39,8 +39,8 @@ class ClassWrapper implements WrapperInterface
     {
         if (str_ends_with($key, '()')) {
             $method = $this->keys[$key];
-            if (!$method->getReturnType()) {
-                throw new MethodDoesNotReturnException(get_class($this->element).'::'.$key . ' has no return type');
+            if ($method->getReturnType()->getName() === 'void') {
+                throw new MissingReturnTypeException($key . ' has no return type');
             }
 
             $method = str_replace('()', '', $key);

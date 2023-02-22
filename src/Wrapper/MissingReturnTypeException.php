@@ -6,6 +6,6 @@ namespace WebFu\Wrapper;
 
 use Exception;
 
-class MethodDoesNotReturnException extends Exception
+class MissingReturnTypeException extends Exception
 {
 }

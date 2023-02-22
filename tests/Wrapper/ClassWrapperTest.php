@@ -6,6 +6,8 @@ namespace WebFu\Tests\Wrapper;
 
 use PHPUnit\Framework\TestCase;
 use WebFu\Wrapper\ClassWrapper;
+use WebFu\Wrapper\MissingReturnTypeException;
+use WebFu\Wrapper\UnsupportedOperationException;
 
 class ClassWrapperTest extends TestCase
 {
@@ -97,5 +99,43 @@ class ClassWrapperTest extends TestCase
             'key' => 'method()',
             'expected' => 'foo',
         ];
+    }
+
+    public function testGetFailIfMethodHasNoReturnType(): void
+    {
+        $element = new class () {
+            public function method(): void {}
+        };
+
+        $this->expectException(MissingReturnTypeException::class);
+        $this->expectExceptionMessage('method() has no return type');
+
+        $wrapper = new ClassWrapper($element);
+        $wrapper->get('method()');
+    }
+
+    public function testSet(): void
+    {
+        $element = new class () {
+            public string $property = 'foo';
+        };
+
+        $wrapper = new ClassWrapper($element);
+        $wrapper->set('property', 'bar');
+
+        $this->assertSame('bar', $element->property);
+    }
+
+    public function testSetFailIfKeyIsMethod(): void
+    {
+        $element = new class () {
+            public function method(): void {}
+        };
+
+        $this->expectException(UnsupportedOperationException::class);
+        $this->expectExceptionMessage('Cannot set a class method');
+
+        $wrapper = new ClassWrapper($element);
+        $wrapper->set('method()', 'bar');
     }
 }
