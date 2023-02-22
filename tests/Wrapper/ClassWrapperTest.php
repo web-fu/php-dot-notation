@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WebFu\Tests\Wrapper;
 
 use PHPUnit\Framework\TestCase;
+use WebFu\Tests\Fixtures\ChildClass;
 use WebFu\Wrapper\ClassWrapper;
 use WebFu\Wrapper\MissingReturnTypeException;
 use WebFu\Wrapper\UnsupportedOperationException;
@@ -69,6 +70,21 @@ class ClassWrapperTest extends TestCase
             'key' => 'method()',
             'expected' => false,
         ];
+    }
+
+    public function testGetKeys(): void
+    {
+        $class = new ChildClass();
+        $wrapper = new ClassWrapper($class);
+
+        $this->assertSame([
+            'public',
+            'publicParent',
+            'publicTrait',
+            'public()',
+            'publicParent()',
+            'publicTrait()',
+        ], $wrapper->getKeys());
     }
 
     /**
