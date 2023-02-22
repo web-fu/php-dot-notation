@@ -104,4 +104,12 @@ class ArrayWrapperTest extends TestCase
             'expected' => 1,
         ];
     }
+
+    public function testSet(): void
+    {
+        $element = ['foo' => 1];
+        $wrapper = new ArrayWrapper($element);
+        $wrapper->set('foo', 2);
+        $this->assertSame(2, $element['foo']);
+    }
 }
