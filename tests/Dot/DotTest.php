@@ -162,6 +162,41 @@ class DotTest extends TestCase
         yield 'ending_with_dot' => ['abc.'];
     }
 
+
+    /**
+     * @dataProvider missingChildPathProvider
+     */
+    public function testMissingChildPath(mixed $value, string $type): void
+    {
+        $element = ['foo' => $value];
+        $dot = new Dot($element);
+
+        $this->expectException(InvalidPathException::class);
+        $this->expectExceptionMessage('Element of type ' . $type . ' has no child element');
+
+        $dot->get('foo.bar');
+    }
+
+    public function missingChildPathProvider(): iterable
+    {
+        yield 'bool' => [
+            'value' => true,
+            'type' => 'bool',
+        ];
+        yield 'int' => [
+            'value' => 1,
+            'type' => 'int',
+        ];
+        yield 'float' => [
+            'value' => 0.5,
+            'type' => 'float',
+        ];
+        yield 'string' => [
+            'value' => 'baz',
+            'type' => 'string',
+        ];
+    }
+
     public function testGetPathNotFound(): void
     {
         $element = ['exists' => 1];
