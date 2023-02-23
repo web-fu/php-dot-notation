@@ -7,7 +7,8 @@ namespace WebFu\Wrapper;
 interface WrapperInterface
 {
     public function has(string|int $key): bool;
+    /** @return string[] */
     public function getKeys(): array;
-    public function get(string|int $key): mixed;
-    public function set(string|int $key, mixed $value): self;
+    public function get(string $key): mixed;
+    public function set(string $key, mixed $value): self;
 }

@@ -10,6 +10,7 @@ use ReflectionProperty;
 
 class ClassWrapper implements WrapperInterface
 {
+    /** @var array<ReflectionProperty|ReflectionMethod> */
     private array $keys = [];
 
     public function __construct(private object $element)
@@ -30,6 +31,9 @@ class ClassWrapper implements WrapperInterface
         return array_key_exists($key, $this->keys);
     }
 
+    /**
+     * @return array<int|string>
+     */
     public function getKeys(): array
     {
         return array_keys($this->keys);
@@ -37,12 +41,9 @@ class ClassWrapper implements WrapperInterface
 
     public function get(int|string $key): mixed
     {
-        if (str_ends_with($key, '()')) {
-            $method = $this->keys[$key];
-            if ($method->getReturnType()->getName() === 'void') {
-                throw new MissingReturnTypeException($key . ' has no return type');
-            }
+        $key = (string) $key;
 
+        if (str_ends_with($key, '()')) {
             $method = str_replace('()', '', $key);
 
             return $this->element->{$method}();
@@ -53,6 +54,8 @@ class ClassWrapper implements WrapperInterface
 
     public function set(int|string $key, mixed $value): WrapperInterface
     {
+        $key = (string) $key;
+
         if (str_ends_with($key, '()')) {
             throw new UnsupportedOperationException('Cannot set a class method');
         }

@@ -37,7 +37,10 @@ final class Dot
             return $value;
         }
 
-        if (!is_array($value) || !is_object($value)) {
+        if (
+            !is_array($value)
+            && !is_object($value)
+        ) {
             $type = get_debug_type($value);
             throw new InvalidPathException('Element of type ' . $type . ' has no child element');
         }

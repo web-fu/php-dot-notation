@@ -6,6 +6,9 @@ namespace WebFu\Wrapper;
 
 class ArrayWrapper implements WrapperInterface
 {
+    /**
+     * @param mixed[] $element
+     */
     public function __construct(private array &$element)
     {
     }
@@ -15,6 +18,9 @@ class ArrayWrapper implements WrapperInterface
         return array_key_exists($key, $this->element);
     }
 
+    /**
+     * @return array<int|string>
+     */
     public function getKeys(): array
     {
         return array_keys($this->element);

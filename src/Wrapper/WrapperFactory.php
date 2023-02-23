@@ -6,6 +6,9 @@ namespace WebFu\Wrapper;
 
 class WrapperFactory
 {
+    /**
+     * @param mixed[]|object $element
+     */
     public static function create(array|object &$element): WrapperInterface
     {
         if (is_array($element)) {

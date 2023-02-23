@@ -117,19 +117,6 @@ class ClassWrapperTest extends TestCase
         ];
     }
 
-    public function testGetFailIfMethodHasNoReturnType(): void
-    {
-        $element = new class () {
-            public function method(): void {}
-        };
-
-        $this->expectException(MissingReturnTypeException::class);
-        $this->expectExceptionMessage('method() has no return type');
-
-        $wrapper = new ClassWrapper($element);
-        $wrapper->get('method()');
-    }
-
     public function testSet(): void
     {
         $element = new class () {
