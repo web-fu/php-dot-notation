@@ -6,7 +6,7 @@ namespace WebFu\Proxy;
 
 interface ProxyInterface
 {
-    public function has(string|int $key): bool;
+    public function has(int|string $key): bool;
     /** @return string[] */
     public function getKeys(): array;
     public function get(string $key): mixed;

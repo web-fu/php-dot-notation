@@ -13,7 +13,7 @@ class ArrayProxy implements ProxyInterface
     {
     }
 
-    public function has(string|int $key): bool
+    public function has(int|string $key): bool
     {
         return array_key_exists($key, $this->element);
     }
@@ -26,12 +26,12 @@ class ArrayProxy implements ProxyInterface
         return array_keys($this->element);
     }
 
-    public function get(string|int $key): mixed
+    public function get(int|string $key): mixed
     {
         return $this->element[$key];
     }
 
-    public function set(string|int $key, mixed $value): self
+    public function set(int|string $key, mixed $value): self
     {
         $this->element[$key] = $value;
 

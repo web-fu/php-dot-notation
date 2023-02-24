@@ -11,8 +11,9 @@ class ArrayProxyTest extends TestCase
 {
     /**
      * @dataProvider hasDataProvider
+     * @param mixed[] $element
      */
-    public function testHas(array $element, string|int $key, bool $expected): void
+    public function testHas(array $element, int|string $key, bool $expected): void
     {
         $wrapper = new ArrayProxy($element);
         $this->assertSame($expected, $wrapper->has($key));
@@ -51,6 +52,8 @@ class ArrayProxyTest extends TestCase
 
     /**
      * @dataProvider getKeysProvider
+     * @param mixed[] $element
+     * @param array<int|string> $expected
      */
     public function testGetKeys(array $element, array $expected): void
     {
@@ -58,6 +61,9 @@ class ArrayProxyTest extends TestCase
         $this->assertSame($expected, $wrapper->getKeys());
     }
 
+    /**
+     * @return iterable<array{element: mixed[], expected: array<int|string>}>
+     */
     public function getKeysProvider(): iterable
     {
         yield 'numeric.keys' => [
@@ -84,13 +90,17 @@ class ArrayProxyTest extends TestCase
 
     /**
      * @dataProvider getDataProvider
+     * @param mixed[] $element
      */
-    public function testGet(array|object $element, string|int $key, mixed $expected): void
+    public function testGet(array $element, int|string $key, mixed $expected): void
     {
         $wrapper = new ArrayProxy($element);
         $this->assertSame($expected, $wrapper->get($key));
     }
 
+    /**
+     * @return iterable<array{element: mixed[], key: int|string, expected: mixed}>
+     */
     public function getDataProvider(): iterable
     {
         yield 'array.key.int' => [

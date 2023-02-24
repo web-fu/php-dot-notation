@@ -14,6 +14,7 @@ class DotTest extends TestCase
 {
     /**
      * @dataProvider getProvider
+     * @param mixed[]|object $element
      */
     public function testGet(array|object $element, string $path, mixed $expected): void
     {
@@ -21,6 +22,9 @@ class DotTest extends TestCase
         $this->assertEquals($expected, $dot->get($path));
     }
 
+    /**
+     * @return iterable<array{element: mixed[]|object, path: string, expected: mixed}>
+     */
     public function getProvider(): iterable
     {
         yield 'class.scalar' => [
@@ -124,6 +128,9 @@ class DotTest extends TestCase
         $dot->validatePath($path);
     }
 
+    /**
+     * @return iterable<string[]>
+     */
     public function pathProvider(): iterable
     {
         yield 'numeric_index_path' => ['0'];
@@ -154,6 +161,9 @@ class DotTest extends TestCase
         $dot->validatePath($wrongPath);
     }
 
+    /**
+     * @return iterable<string[]>
+     */
     public function invalidPathProvider(): iterable
     {
         yield 'starting_with_number' => ['0abc'];
@@ -177,6 +187,9 @@ class DotTest extends TestCase
         $dot->get('foo.bar');
     }
 
+    /**
+     * @return iterable<array{value: mixed, type: string}>
+     */
     public function missingChildPathProvider(): iterable
     {
         yield 'bool' => [

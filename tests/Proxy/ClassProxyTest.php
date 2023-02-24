@@ -41,6 +41,7 @@ class ClassProxyTest extends TestCase
         ];
         yield 'class.property.is-not-visible' => [
             'element' => new class () {
+                /** @phpstan-ignore-next-line  */
                 private string $property;
             },
             'key' => 'property',
@@ -63,6 +64,7 @@ class ClassProxyTest extends TestCase
         ];
         yield 'class.method.is-not-visible' => [
             'element' => new class () {
+                /** @phpstan-ignore-next-line  */
                 private function method(): void
                 {
                 }
@@ -90,12 +92,15 @@ class ClassProxyTest extends TestCase
     /**
      * @dataProvider getDataProvider
      */
-    public function testGet(object $element, string|int $key, mixed $expected): void
+    public function testGet(object $element, string $key, mixed $expected): void
     {
         $wrapper = new ClassProxy($element);
         $this->assertSame($expected, $wrapper->get($key));
     }
 
+    /**
+     * @return iterable<array{element: object, key: string, expected: mixed}>
+     */
     public function getDataProvider(): iterable
     {
         yield 'class.property' => [
