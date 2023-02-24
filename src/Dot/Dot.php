@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace WebFu\Dot;
 
-use WebFu\Wrapper\WrapperFactory;
-use WebFu\Wrapper\WrapperInterface;
+use WebFu\Proxy\ProxyFactory;
+use WebFu\Proxy\ProxyInterface;
 
 final class Dot
 {
-    private WrapperInterface $wrapper;
+    private ProxyInterface $wrapper;
 
     /**
      * @param mixed[]|object $element
@@ -17,7 +17,7 @@ final class Dot
      */
     public function __construct(private array|object $element, private string $separator = '.')
     {
-        $this->wrapper = WrapperFactory::create($this->element);
+        $this->wrapper = ProxyFactory::create($this->element);
     }
 
     public function get(string $path): mixed

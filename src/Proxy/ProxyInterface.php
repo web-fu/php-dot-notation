@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace WebFu\Wrapper;
+namespace WebFu\Proxy;
 
-interface WrapperInterface
+interface ProxyInterface
 {
     public function has(string|int $key): bool;
     /** @return string[] */

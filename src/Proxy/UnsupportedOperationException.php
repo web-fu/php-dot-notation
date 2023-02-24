@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WebFu\Wrapper;
+namespace WebFu\Proxy;
 
 use Exception;
 

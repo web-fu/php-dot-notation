@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace WebFu\Tests\Wrapper;
+namespace WebFu\Tests\Proxy;
 
 use PHPUnit\Framework\TestCase;
 use WebFu\Tests\Fixtures\ChildClass;
-use WebFu\Wrapper\ClassWrapper;
-use WebFu\Wrapper\MissingReturnTypeException;
-use WebFu\Wrapper\UnsupportedOperationException;
+use WebFu\Proxy\ClassProxy;
+use WebFu\Proxy\MissingReturnTypeException;
+use WebFu\Proxy\UnsupportedOperationException;
 
-class ClassWrapperTest extends TestCase
+class ClassProxyTest extends TestCase
 {
     /**
      * @dataProvider hasDataProvider
      */
     public function testHas(object $element, string $key, bool $expected): void
     {
-        $wrapper = new ClassWrapper($element);
+        $wrapper = new ClassProxy($element);
         $this->assertSame($expected, $wrapper->has($key));
     }
 
@@ -75,7 +75,7 @@ class ClassWrapperTest extends TestCase
     public function testGetKeys(): void
     {
         $class = new ChildClass();
-        $wrapper = new ClassWrapper($class);
+        $wrapper = new ClassProxy($class);
 
         $this->assertSame([
             'public',
@@ -92,7 +92,7 @@ class ClassWrapperTest extends TestCase
      */
     public function testGet(object $element, string|int $key, mixed $expected): void
     {
-        $wrapper = new ClassWrapper($element);
+        $wrapper = new ClassProxy($element);
         $this->assertSame($expected, $wrapper->get($key));
     }
 
@@ -123,7 +123,7 @@ class ClassWrapperTest extends TestCase
             public string $property = 'foo';
         };
 
-        $wrapper = new ClassWrapper($element);
+        $wrapper = new ClassProxy($element);
         $wrapper->set('property', 'bar');
 
         $this->assertSame('bar', $element->property);
@@ -138,7 +138,7 @@ class ClassWrapperTest extends TestCase
         $this->expectException(UnsupportedOperationException::class);
         $this->expectExceptionMessage('Cannot set a class method');
 
-        $wrapper = new ClassWrapper($element);
+        $wrapper = new ClassProxy($element);
         $wrapper->set('method()', 'bar');
     }
 }

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace WebFu\Wrapper;
+namespace WebFu\Proxy;
 
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
 
-class ClassWrapper implements WrapperInterface
+class ClassProxy implements ProxyInterface
 {
     /** @var array<ReflectionProperty|ReflectionMethod> */
     private array $keys = [];
@@ -52,7 +52,7 @@ class ClassWrapper implements WrapperInterface
         return $this->element->{$key};
     }
 
-    public function set(int|string $key, mixed $value): WrapperInterface
+    public function set(int|string $key, mixed $value): ProxyInterface
     {
         $key = (string) $key;
 

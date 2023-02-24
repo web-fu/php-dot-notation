@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace WebFu\Tests\Wrapper;
+namespace WebFu\Tests\Proxy;
 
 use PHPUnit\Framework\TestCase;
-use WebFu\Wrapper\ArrayWrapper;
+use WebFu\Proxy\ArrayProxy;
 
-class ArrayWrapperTest extends TestCase
+class ArrayProxyTest extends TestCase
 {
     /**
      * @dataProvider hasDataProvider
      */
     public function testHas(array $element, string|int $key, bool $expected): void
     {
-        $wrapper = new ArrayWrapper($element);
+        $wrapper = new ArrayProxy($element);
         $this->assertSame($expected, $wrapper->has($key));
     }
 
@@ -43,7 +43,7 @@ class ArrayWrapperTest extends TestCase
     public function testHasAfterChange(): void
     {
         $element = ['foo' => 'string'];
-        $wrapper = new ArrayWrapper($element);
+        $wrapper = new ArrayProxy($element);
         $this->assertSame(false, $wrapper->has('bar'));
         $element['bar'] = 'new';
         $this->assertSame(true, $wrapper->has('bar'));
@@ -54,7 +54,7 @@ class ArrayWrapperTest extends TestCase
      */
     public function testGetKeys(array $element, array $expected): void
     {
-        $wrapper = new ArrayWrapper($element);
+        $wrapper = new ArrayProxy($element);
         $this->assertSame($expected, $wrapper->getKeys());
     }
 
@@ -87,7 +87,7 @@ class ArrayWrapperTest extends TestCase
      */
     public function testGet(array|object $element, string|int $key, mixed $expected): void
     {
-        $wrapper = new ArrayWrapper($element);
+        $wrapper = new ArrayProxy($element);
         $this->assertSame($expected, $wrapper->get($key));
     }
 
@@ -108,7 +108,7 @@ class ArrayWrapperTest extends TestCase
     public function testSet(): void
     {
         $element = ['foo' => 1];
-        $wrapper = new ArrayWrapper($element);
+        $wrapper = new ArrayProxy($element);
         $wrapper->set('foo', 2);
         $this->assertSame(2, $element['foo']);
     }

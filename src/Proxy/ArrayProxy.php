@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace WebFu\Wrapper;
+namespace WebFu\Proxy;
 
-class ArrayWrapper implements WrapperInterface
+class ArrayProxy implements ProxyInterface
 {
     /**
      * @param mixed[] $element
