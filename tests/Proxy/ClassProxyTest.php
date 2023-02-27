@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace WebFu\Tests\Proxy;
 
 use PHPUnit\Framework\TestCase;
-use WebFu\Tests\Fixtures\ChildClass;
+use WebFu\Tests\Fixture\ChildClass;
 use WebFu\Proxy\ClassProxy;
 use WebFu\Proxy\MissingReturnTypeException;
 use WebFu\Proxy\UnsupportedOperationException;

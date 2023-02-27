@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WebFu\Tests\Fixtures;
+namespace WebFu\Tests\Fixture;
 
 class ParentClass
 {
