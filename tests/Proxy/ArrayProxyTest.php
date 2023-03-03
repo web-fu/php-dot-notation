@@ -84,7 +84,7 @@ class ArrayProxyTest extends TestCase
         ];
         yield 'mixed.keys' => [
             'element' => ['foo' => 1, 'bar'],
-            'expected' => ['foo', 0]
+            'expected' => ['foo', 0],
         ];
     }
 

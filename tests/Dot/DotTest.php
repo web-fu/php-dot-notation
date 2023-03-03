@@ -172,7 +172,6 @@ class DotTest extends TestCase
         yield 'ending_with_dot' => ['abc.'];
     }
 
-
     /**
      * @dataProvider missingChildPathProvider
      */

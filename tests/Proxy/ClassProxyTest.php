@@ -7,7 +7,6 @@ namespace WebFu\Tests\Proxy;
 use PHPUnit\Framework\TestCase;
 use WebFu\Tests\Fixture\ChildClass;
 use WebFu\Proxy\ClassProxy;
-use WebFu\Proxy\MissingReturnTypeException;
 use WebFu\Proxy\UnsupportedOperationException;
 
 class ClassProxyTest extends TestCase
@@ -137,7 +136,9 @@ class ClassProxyTest extends TestCase
     public function testSetFailIfKeyIsMethod(): void
     {
         $element = new class () {
-            public function method(): void {}
+            public function method(): void
+            {
+            }
         };
 
         $this->expectException(UnsupportedOperationException::class);
