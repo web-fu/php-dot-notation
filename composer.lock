@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1eec4e2e103d86159d32f0ed389fa8c7",
+    "content-hash": "02bfc2705842d29a23997e046cbf34e2",
     "packages": [],
     "packages-dev": [
         {
@@ -4623,6 +4623,59 @@
             "time": "2023-01-23T20:32:47+00:00"
         },
         {
+            "name": "web-fu/reflection",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/web-fu/reflection.git",
+                "reference": "9dae99ec050876282dd1baee59410b9a39072903"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/web-fu/reflection/zipball/9dae99ec050876282dd1baee59410b9a39072903",
+                "reference": "9dae99ec050876282dd1baee59410b9a39072903",
+                "shasum": ""
+            },
+            "require": {
+                "php": "8.0.* || 8.1.* || 8.2.*"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.13",
+                "phpbench/phpbench": "^1.2",
+                "phpstan/phpstan": "^1.9",
+                "phpunit/phpunit": "^9.5",
+                "vimeo/psalm": "^5.4"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "WebFu\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Gabriele Manganello",
+                    "email": "info@web-fu.it",
+                    "homepage": "https://web-fu.it"
+                }
+            ],
+            "description": "Reflection API",
+            "keywords": [
+                "reflection",
+                "static analysis"
+            ],
+            "support": {
+                "issues": "https://github.com/web-fu/reflection/issues",
+                "source": "https://github.com/web-fu/reflection/tree/v.0.2"
+            },
+            "time": "2023-03-30T15:57:08+00:00"
+        },
+        {
             "name": "webmozart/assert",
             "version": "1.11.0",
             "source": {
@@ -4683,7 +4736,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "web-fu/reflection": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

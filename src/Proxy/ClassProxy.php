@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace WebFu\Proxy;
 
-use ReflectionClass;
-use ReflectionMethod;
-use ReflectionProperty;
+use WebFu\Reflection\ReflectionClass;
+use WebFu\Reflection\ReflectionMethod;
+use WebFu\Reflection\ReflectionProperty;
 
 class ClassProxy implements ProxyInterface
 {
