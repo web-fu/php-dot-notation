@@ -2,7 +2,16 @@
 
 declare(strict_types=1);
 
-namespace WebFu\Proxy;
+/**
+ * This file is part of web-fu/php-dot-notation
+ *
+ * @copyright Web-Fu <info@web-fu.it>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace WebFu\DotNotation\Proxy;
 
 class ProxyFactory
 {
@@ -14,6 +23,7 @@ class ProxyFactory
         if (is_array($element)) {
             return new ArrayProxy($element);
         }
+
         return new ClassProxy($element);
     }
 }

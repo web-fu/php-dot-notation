@@ -2,15 +2,27 @@
 
 declare(strict_types=1);
 
-namespace WebFu\Proxy;
+/**
+ * This file is part of web-fu/php-dot-notation
+ *
+ * @copyright Web-Fu <info@web-fu.it>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
+namespace WebFu\DotNotation\Proxy;
+
+use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\Reflection\ReflectionClass;
 use WebFu\Reflection\ReflectionMethod;
 use WebFu\Reflection\ReflectionProperty;
 
 class ClassProxy implements ProxyInterface
 {
-    /** @var array<ReflectionProperty|ReflectionMethod> */
+    /**
+     * @var array<ReflectionProperty|ReflectionMethod>
+     */
     private array $keys = [];
 
     public function __construct(private object $element)
@@ -22,7 +34,7 @@ class ClassProxy implements ProxyInterface
         }
 
         foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-            $this->keys[$method->getName() . '()'] = $method;
+            $this->keys[$method->getName().'()'] = $method;
         }
     }
 

@@ -2,17 +2,28 @@
 
 declare(strict_types=1);
 
-namespace WebFu\Dot;
+/**
+ * This file is part of web-fu/php-dot-notation
+ *
+ * @copyright Web-Fu <info@web-fu.it>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-use WebFu\Proxy\ProxyFactory;
-use WebFu\Proxy\ProxyInterface;
+namespace WebFu\DotNotation;
+
+use WebFu\DotNotation\Exception\InvalidPathException;
+use WebFu\DotNotation\Exception\PathNotFoundException;
+use WebFu\DotNotation\Proxy\ProxyFactory;
+use WebFu\DotNotation\Proxy\ProxyInterface;
 
 final class Dot
 {
     private ProxyInterface $wrapper;
 
     /**
-     * @param mixed[]|object $element
+     * @param mixed[]|object   $element
      * @param non-empty-string $separator
      */
     public function __construct(private array|object $element, private string $separator = '.')
@@ -25,10 +36,10 @@ final class Dot
         $this->validatePath($path);
 
         $pathTracks = explode($this->separator, $path);
-        $track = array_shift($pathTracks);
+        $track      = array_shift($pathTracks);
 
         if (!$this->wrapper->has($track)) {
-            throw new PathNotFoundException($track . ' path not found');
+            throw new PathNotFoundException($track.' path not found');
         }
 
         $value = $this->wrapper->get($track);
@@ -42,7 +53,7 @@ final class Dot
             && !is_object($value)
         ) {
             $type = get_debug_type($value);
-            throw new InvalidPathException('Element of type ' . $type . ' has no child element');
+            throw new InvalidPathException('Element of type '.$type.' has no child element');
         }
 
         $next = new self($value);
@@ -56,7 +67,7 @@ final class Dot
 
         preg_match('/(([a-zA-Z_][a-zA-Z_0-9]*(\(\))?)|([-+]?\d+))('.$separatorEscaped.'(([a-zA-Z_][a-zA-Z_0-9]*(\(\))?)|([-+]?\d+)))*/', $path, $matches);
         if (!count($matches) || $matches[0] !== $path) {
-            throw new InvalidPathException($path . ' is not a valid path');
+            throw new InvalidPathException($path.' is not a valid path');
         }
     }
 }
