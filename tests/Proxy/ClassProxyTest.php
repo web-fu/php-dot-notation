@@ -2,13 +2,25 @@
 
 declare(strict_types=1);
 
+/**
+ * This file is part of web-fu/php-dot-notation
+ *
+ * @copyright Web-Fu <info@web-fu.it>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace WebFu\Tests\Proxy;
 
 use PHPUnit\Framework\TestCase;
-use WebFu\Tests\Fixture\ChildClass;
 use WebFu\Proxy\ClassProxy;
 use WebFu\Proxy\UnsupportedOperationException;
+use WebFu\Tests\Fixture\ChildClass;
 
+/**
+ * @coversNothing
+ */
 class ClassProxyTest extends TestCase
 {
     /**
@@ -26,56 +38,60 @@ class ClassProxyTest extends TestCase
     public function hasDataProvider(): iterable
     {
         yield 'class.property.exists' => [
-            'element' => new class () {
+            'element' => new class() {
                 public string $property;
             },
-            'key' => 'property',
+            'key'      => 'property',
             'expected' => true,
         ];
         yield 'class.property.not-exists' => [
-            'element' => new class () {
+            'element' => new class() {
             },
-            'key' => 'property',
+            'key'      => 'property',
             'expected' => false,
         ];
         yield 'class.property.is-not-visible' => [
-            'element' => new class () {
-                /** @phpstan-ignore-next-line  */
+            'element' => new class() {
+                /**
+                 * @phpstan-ignore-next-line
+                 */
                 private string $property;
             },
-            'key' => 'property',
+            'key'      => 'property',
             'expected' => false,
         ];
         yield 'class.method.exists' => [
-            'element' => new class () {
+            'element' => new class() {
                 public function method(): void
                 {
                 }
             },
-            'key' => 'method()',
+            'key'      => 'method()',
             'expected' => true,
         ];
         yield 'class.method.not-exists' => [
-            'element' => new class () {
+            'element' => new class() {
             },
-            'key' => 'method()',
+            'key'      => 'method()',
             'expected' => false,
         ];
         yield 'class.method.is-not-visible' => [
-            'element' => new class () {
-                /** @phpstan-ignore-next-line  */
+            'element' => new class() {
+                /**
+                 * @phpstan-ignore-next-line
+                 */
                 private function method(): void
                 {
                 }
             },
-            'key' => 'method()',
+            'key'      => 'method()',
             'expected' => false,
         ];
     }
 
     public function testGetKeys(): void
     {
-        $class = new ChildClass();
+        $class   = new ChildClass();
         $wrapper = new ClassProxy($class);
 
         $this->assertSame([
@@ -103,27 +119,27 @@ class ClassProxyTest extends TestCase
     public function getDataProvider(): iterable
     {
         yield 'class.property' => [
-            'element' => new class () {
+            'element' => new class() {
                 public string $property = 'foo';
             },
-            'key' => 'property',
+            'key'      => 'property',
             'expected' => 'foo',
         ];
         yield 'class.method' => [
-            'element' => new class () {
+            'element' => new class() {
                 public function method(): string
                 {
                     return 'foo';
                 }
             },
-            'key' => 'method()',
+            'key'      => 'method()',
             'expected' => 'foo',
         ];
     }
 
     public function testSet(): void
     {
-        $element = new class () {
+        $element = new class() {
             public string $property = 'foo';
         };
 
@@ -135,7 +151,7 @@ class ClassProxyTest extends TestCase
 
     public function testSetFailIfKeyIsMethod(): void
     {
-        $element = new class () {
+        $element = new class() {
             public function method(): void
             {
             }
