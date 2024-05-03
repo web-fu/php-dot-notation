@@ -14,7 +14,8 @@
     }
   ],
   "require": {
-    "php": "8.0.* || 8.1.* || 8.2.*"
+    "php": "8.0.* || 8.1.* || 8.2.* || 8.3.*",
+    "web-fu/reflection": "^2.1"
   },
   "autoload": {
     "psr-4": {
@@ -30,7 +31,16 @@
     "phpunit/phpunit": "^9.5",
     "friendsofphp/php-cs-fixer": "^3.13",
     "phpstan/phpstan": "^1.9",
-    "vimeo/psalm": "^5.4",
-    "web-fu/reflection": "dev-main"
+    "vimeo/psalm": "^5.4"
+  },
+  "scripts": {
+    "cs": "PHP_CS_FIXER_IGNORE_ENV=1 php ./vendor/bin/php-cs-fixer fix --dry-run --allow-risky=yes",
+    "cs:fix": "PHP_CS_FIXER_IGNORE_ENV=1 php ./vendor/bin/php-cs-fixer fix --allow-risky=yes",
+    "phpstan": "./vendor/bin/phpstan analyse --memory-limit=-1",
+    "tests": "./vendor/bin/phpunit --coverage-text --color",
+    "ci": [
+      "@autoload",
+      "@parallel cs phpstan tests"
+    ]
   }
 }
