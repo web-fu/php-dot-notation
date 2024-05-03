@@ -11,12 +11,12 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace WebFu\Tests\Proxy;
+namespace WebFu\DotNotation\Tests\Integration\Proxy;
 
 use PHPUnit\Framework\TestCase;
-use WebFu\Proxy\ClassProxy;
-use WebFu\Proxy\UnsupportedOperationException;
-use WebFu\Tests\Fixture\ChildClass;
+use WebFu\DotNotation\Exception\UnsupportedOperationException;
+use WebFu\DotNotation\Proxy\ClassProxy;
+use WebFu\DotNotation\Tests\Fixtures\ChildClass;
 
 /**
  * @coversNothing

@@ -19,12 +19,12 @@
   },
   "autoload": {
     "psr-4": {
-      "WebFu\\": "src/"
+      "WebFu\\DotNotation\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "WebFu\\Tests\\": "tests/"
+      "WebFu\\DotNotation\\Tests\\": "tests/"
     }
   },
   "require-dev": {

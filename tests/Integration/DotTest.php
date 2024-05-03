@@ -11,13 +11,13 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace WebFu\Tests\Dot;
+namespace WebFu\DotNotation\Tests\Integration;
 
 use PHPUnit\Framework\TestCase;
 use stdClass;
-use WebFu\Dot\Dot;
-use WebFu\Dot\InvalidPathException;
-use WebFu\Dot\PathNotFoundException;
+use WebFu\DotNotation\Dot;
+use WebFu\DotNotation\Exception\InvalidPathException;
+use WebFu\DotNotation\Exception\PathNotFoundException;
 
 /**
  * @coversNothing

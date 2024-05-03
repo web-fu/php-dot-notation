@@ -11,10 +11,4 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace WebFu\Dot;
-
-use Exception;
-
-class InvalidPathException extends Exception
-{
-}
+require dirname(__DIR__).'/vendor/autoload.php';

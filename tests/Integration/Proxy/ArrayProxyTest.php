@@ -11,10 +11,10 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace WebFu\Tests\Proxy;
+namespace WebFu\DotNotation\Tests\Integration\Proxy;
 
 use PHPUnit\Framework\TestCase;
-use WebFu\Proxy\ArrayProxy;
+use WebFu\DotNotation\Proxy\ArrayProxy;
 
 /**
  * @coversNothing

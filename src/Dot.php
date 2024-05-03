@@ -11,10 +11,12 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace WebFu\Dot;
+namespace WebFu\DotNotation;
 
-use WebFu\Proxy\ProxyFactory;
-use WebFu\Proxy\ProxyInterface;
+use WebFu\DotNotation\Exception\InvalidPathException;
+use WebFu\DotNotation\Exception\PathNotFoundException;
+use WebFu\DotNotation\Proxy\ProxyFactory;
+use WebFu\DotNotation\Proxy\ProxyInterface;
 
 final class Dot
 {

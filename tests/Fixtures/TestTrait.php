@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace WebFu\Tests\Fixture;
+namespace WebFu\DotNotation\Tests\Fixtures;
 
 trait TestTrait
 {

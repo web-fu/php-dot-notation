@@ -11,10 +11,10 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace WebFu\Proxy;
+namespace WebFu\DotNotation\Exception;
 
 use Exception;
 
-class UnsupportedOperationException extends Exception
+class InvalidPathException extends Exception
 {
 }
