@@ -33,7 +33,9 @@ final class Dot
 
     public function get(string $path): mixed
     {
-        $this->validatePath($path);
+        if (!self::isValidPath($path, $this->separator)) {
+            throw new InvalidPathException('Invalid path: '.$path);
+        }
 
         $pathTracks = explode($this->separator, $path);
         $track      = array_shift($pathTracks);
@@ -61,14 +63,13 @@ final class Dot
         return $next->get(implode($this->separator, $pathTracks));
     }
 
-    public function validatePath(string $path): void
+    public static function isValidPath(string $path, string $separator = '.'): bool
     {
-        $separatorEscaped = preg_quote($this->separator);
+        $separatorEscaped = preg_quote($separator);
 
         preg_match('/(([a-zA-Z_][a-zA-Z_0-9]*(\(\))?)|([-+]?\d+))('.$separatorEscaped.'(([a-zA-Z_][a-zA-Z_0-9]*(\(\))?)|([-+]?\d+)))*/', $path, $matches);
-        if (!count($matches) || $matches[0] !== $path) {
-            throw new InvalidPathException($path.' is not a valid path');
-        }
+
+        return count($matches) && $matches[0] === $path;
     }
 
     public static function dotify(array|object $element, string $separator = '.'): string
