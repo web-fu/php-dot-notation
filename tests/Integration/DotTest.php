@@ -153,6 +153,7 @@ class DotTest extends TestCase
      */
     public function pathProvider(): iterable
     {
+        yield 'empty' => [''];
         yield 'numeric_index_path' => ['0'];
         yield 'literal_index_path' => ['foo'];
         yield 'method_path' => ['foo()'];

@@ -65,6 +65,10 @@ final class Dot
 
     public static function isValidPath(string $path, string $separator = '.'): bool
     {
+        if ('' === $path) {
+            return true;
+        }
+
         $separatorEscaped = preg_quote($separator);
 
         preg_match('/(([a-zA-Z_][a-zA-Z_0-9]*(\(\))?)|([-+]?\d+))('.$separatorEscaped.'(([a-zA-Z_][a-zA-Z_0-9]*(\(\))?)|([-+]?\d+)))*/', $path, $matches);
@@ -84,7 +88,7 @@ final class Dot
         $keys   = $dot->wrapper->getKeys();
         $result = [];
         foreach ($keys as $key) {
-            $value = $dot->get($key);
+            $value = $dot->get((string) $key);
             if (is_array($value) || is_object($value)) {
                 $result = array_merge($result, self::dotify($value, $prefix.$key.$separator));
             } else {
