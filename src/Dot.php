@@ -72,19 +72,26 @@ final class Dot
         return count($matches) && $matches[0] === $path;
     }
 
-    public static function dotify(array|object $element, string $separator = '.'): string
+    /**
+     * @param mixed[]|object   $element
+     * @param non-empty-string $separator
+     *
+     * @return mixed[]
+     */
+    public static function dotify(array|object $element, string $prefix = '', string $separator = '.'): array
     {
-        $dot = new self($element, $separator);
-        $keys = $dot->wrapper->getKeys();
-        $result = '';
+        $dot    = new self($element, $separator);
+        $keys   = $dot->wrapper->getKeys();
+        $result = [];
         foreach ($keys as $key) {
-            $value = $dot->wrapper->get($key);
+            $value = $dot->get($key);
             if (is_array($value) || is_object($value)) {
-                $result .= $key.$separator.self::dotify($value, $separator);
+                $result = array_merge($result, self::dotify($value, $prefix.$key.$separator));
             } else {
-                $result .= $key.$separator.$value.PHP_EOL;
+                $result[$prefix.$key] = $value;
             }
         }
+
         return $result;
     }
 }

@@ -124,6 +124,13 @@ class DotTest extends TestCase
             'path'     => 'objectList.0.string',
             'expected' => 'test',
         ];
+        /*
+        yield 'array.method' => [
+            'element'  => ['method' => fn () => 1],
+            'path'     => 'method.()',
+            'expected' => 1,
+        ];
+        */
     }
 
     public function testGetWithCustomSeparator(): void
@@ -158,6 +165,7 @@ class DotTest extends TestCase
         yield 'method.numeric' => ['foo().0'];
         yield 'method.literal' => ['foo().bar'];
         yield 'method.method' => ['foo().bar()'];
+        // yield 'anonymous_method' => ['()'];
     }
 
     /**
@@ -177,6 +185,7 @@ class DotTest extends TestCase
         yield 'illegal_character' => ['\$abc'];
         yield 'unclosed_parenthesis' => ['abc('];
         yield 'ending_with_dot' => ['abc.'];
+        yield 'chars_inside_parenthesis' => ['abc(a)'];
     }
 
     /**
@@ -227,17 +236,55 @@ class DotTest extends TestCase
         $dot->get('notExists');
     }
 
-    public function testDotify(): void
+    /**
+     * @dataProvider elementProvider
+     *
+     * @param mixed[]|object $element
+     */
+    public function testDotify(array|object $element): void
     {
-        $array = [
-            'foo' => 'bar',
-            'baz' => [
-                'qux' => 'quux',
+        var_dump($element);
+        $arrayDotified = Dot::dotify($element);
+        var_dump($arrayDotified);
+
+        $this->assertEquals([
+            'foo'      => 'bar',
+            'baz.qux'  => 'quux',
+            'baz.quuz' => 'corge',
+        ], $arrayDotified);
+    }
+
+    /**
+     * @return iterable<array{element: mixed[]|object}>
+     */
+    public function elementProvider(): iterable
+    {
+        yield 'array' => [
+            'element' => [
+                'foo' => 'bar',
+                'baz' => [
+                    'qux'  => 'quux',
+                    'quuz' => 'corge',
+                ],
             ],
         ];
-
-        $arrayDotified = Dot::dotify($array);
-
-        $this->assertEquals("foo.bar".PHP_EOL."baz.qux.quux".PHP_EOL, $arrayDotified);
+        yield 'object' => [
+            'element' => (object) [
+                'foo' => 'bar',
+                'baz' => (object) [
+                    'qux'  => 'quux',
+                    'quuz' => 'corge',
+                ],
+            ],
+        ];
+        yield 'array_and_object' => [
+            'element' => [
+                'foo' => 'bar',
+                'baz' => (object) [
+                    'qux'  => 'quux',
+                    'quuz' => 'corge',
+                ],
+            ],
+        ];
     }
 }
