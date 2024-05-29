@@ -236,4 +236,18 @@ class DotTest extends TestCase
 
         $dot->get('notExists');
     }
+
+    public function testDotify(): void
+    {
+        $array = [
+            'foo' => 'bar',
+            'baz' => [
+                'qux' => 'quux',
+            ],
+        ];
+
+        $arrayDotified = Dot::dotify($array);
+
+        $this->assertEquals("foo.bar".PHP_EOL."baz.qux.quux".PHP_EOL, $arrayDotified);
+    }
 }

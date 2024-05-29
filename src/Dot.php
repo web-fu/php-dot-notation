@@ -70,4 +70,20 @@ final class Dot
             throw new InvalidPathException($path.' is not a valid path');
         }
     }
+
+    public static function dotify(array|object $element, string $separator = '.'): string
+    {
+        $dot = new self($element, $separator);
+        $keys = $dot->wrapper->getKeys();
+        $result = '';
+        foreach ($keys as $key) {
+            $value = $dot->wrapper->get($key);
+            if (is_array($value) || is_object($value)) {
+                $result .= $key.$separator.self::dotify($value, $separator);
+            } else {
+                $result .= $key.$separator.$value.PHP_EOL;
+            }
+        }
+        return $result;
+    }
 }
