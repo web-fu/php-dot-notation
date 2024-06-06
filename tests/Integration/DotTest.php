@@ -244,9 +244,7 @@ class DotTest extends TestCase
      */
     public function testDotify(array|object $element): void
     {
-        var_dump($element);
         $arrayDotified = Dot::dotify($element);
-        var_dump($arrayDotified);
 
         $this->assertEquals([
             'foo'      => 'bar',
