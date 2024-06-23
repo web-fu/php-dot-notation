@@ -20,11 +20,13 @@ use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 
 /**
- * @coversNothing
+ * @coversDefaultClass \WebFu\DotNotation\Dot
  */
 class DotTest extends TestCase
 {
     /**
+     * @covers ::get
+     *
      * @dataProvider getProvider
      *
      * @param mixed[]|object $element
@@ -133,6 +135,9 @@ class DotTest extends TestCase
         */
     }
 
+    /**
+     * @covers ::get
+     */
     public function testGetWithCustomSeparator(): void
     {
         $element = ['foo' => ['bar' => 1]];
@@ -141,6 +146,8 @@ class DotTest extends TestCase
     }
 
     /**
+     * @covers ::isValidPath
+     *
      * @dataProvider pathProvider
      */
     public function testIsValidPath(string $path): void
@@ -170,6 +177,8 @@ class DotTest extends TestCase
     }
 
     /**
+     * @covers ::isValidPath
+     *
      * @dataProvider invalidPathProvider
      */
     public function testIsValidPathIsFalse(string $wrongPath): void
@@ -190,6 +199,8 @@ class DotTest extends TestCase
     }
 
     /**
+     * @covers ::get
+     *
      * @dataProvider missingChildPathProvider
      */
     public function testMissingChildPath(mixed $value, string $type): void
@@ -226,6 +237,9 @@ class DotTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::get
+     */
     public function testGetPathNotFound(): void
     {
         $element = ['exists' => 1];
@@ -238,6 +252,8 @@ class DotTest extends TestCase
     }
 
     /**
+     * @covers ::dotify
+     *
      * @dataProvider elementProvider
      *
      * @param mixed[]|object $element
