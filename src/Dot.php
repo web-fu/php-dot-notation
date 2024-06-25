@@ -71,7 +71,7 @@ final class Dot
 
         $separatorEscaped = preg_quote($separator);
 
-        preg_match('/(([a-zA-Z_][a-zA-Z_0-9]*(\(\))?)|([-+]?\d+))('.$separatorEscaped.'(([a-zA-Z_][a-zA-Z_0-9]*(\(\))?)|([-+]?\d+)))*/', $path, $matches);
+        preg_match('/(([a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*(\(\))?)|([-+]?\d+))('.$separatorEscaped.'(([a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*(\(\))?)|([-+]?\d+)))*/', $path, $matches);
 
         return count($matches) && $matches[0] === $path;
     }

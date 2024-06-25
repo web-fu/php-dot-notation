@@ -124,13 +124,6 @@ class DotTest extends TestCase
             'path'     => 'objectList.0.string',
             'expected' => 'test',
         ];
-        /*
-        yield 'array.method' => [
-            'element'  => ['method' => fn () => 1],
-            'path'     => 'method.()',
-            'expected' => 1,
-        ];
-        */
     }
 
     public function testGetWithCustomSeparator(): void
@@ -156,6 +149,7 @@ class DotTest extends TestCase
         yield 'empty' => [''];
         yield 'numeric_index_path' => ['0'];
         yield 'literal_index_path' => ['foo'];
+        yield 'unicode_path' => ['🦄'];
         yield 'method_path' => ['foo()'];
         yield 'numeric.numeric' => ['0.0'];
         yield 'numeric.literal' => ['0.bar'];
@@ -166,7 +160,6 @@ class DotTest extends TestCase
         yield 'method.numeric' => ['foo().0'];
         yield 'method.literal' => ['foo().bar'];
         yield 'method.method' => ['foo().bar()'];
-        // yield 'anonymous_method' => ['()'];
     }
 
     /**
