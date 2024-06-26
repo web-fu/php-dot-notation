@@ -20,7 +20,7 @@ use WebFu\DotNotation\Proxy\ProxyInterface;
 
 final class Dot
 {
-    private ProxyInterface $wrapper;
+    private ProxyInterface $proxy;
 
     /**
      * @param mixed[]|object   $element
@@ -28,23 +28,19 @@ final class Dot
      */
     public function __construct(private array|object $element, private string $separator = '.')
     {
-        $this->wrapper = ProxyFactory::create($this->element);
+        $this->proxy = ProxyFactory::create($this->element);
     }
 
     public function get(string $path): mixed
     {
-        if (!self::isValidPath($path, $this->separator)) {
-            throw new InvalidPathException('Invalid path: '.$path);
-        }
-
         $pathTracks = explode($this->separator, $path);
         $track      = array_shift($pathTracks);
 
-        if (!$this->wrapper->has($track)) {
+        if (!$this->proxy->has($track)) {
             throw new PathNotFoundException($track.' path not found');
         }
 
-        $value = $this->wrapper->get($track);
+        $value = $this->proxy->get($track);
 
         if (!count($pathTracks)) {
             return $value;
@@ -63,6 +59,9 @@ final class Dot
         return $next->get(implode($this->separator, $pathTracks));
     }
 
+    /**
+     * @deprecated to be removed in the next major version
+     */
     public static function isValidPath(string $path, string $separator = '.'): bool
     {
         if ('' === $path) {
@@ -85,7 +84,7 @@ final class Dot
     public static function dotify(array|object $element, string $prefix = '', string $separator = '.'): array
     {
         $dot    = new self($element, $separator);
-        $keys   = $dot->wrapper->getKeys();
+        $keys   = $dot->proxy->getKeys();
         $result = [];
         foreach ($keys as $key) {
             $value = $dot->get((string) $key);
