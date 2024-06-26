@@ -10,9 +10,6 @@ PHP Dot Notation
 
 Library that allows to access array and object with strong type support using Javascript-like Dot Notation
 
-## Note
-This library is an Alpha version and should not be used in a production environment.
-
 ## Examples
 ```php
 $array = [
