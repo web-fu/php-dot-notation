@@ -21,9 +21,11 @@ $array = [
     ],
 ];
 
+// Accessing an array
 $dot = new Dot($array);
 echo $dot->get('foo.bar'); //test
 
+// Setting a value in an array
 $dot->set('foo.bar', 'baz');
 echo $array['foo']['bar']; //baz
 
@@ -36,12 +38,24 @@ $class = new class() {
     }
 }
 
+// Accessing an object
 $dot = new Dot($class);
 echo $dot->get('property'); //test
 echo $dot->get('method()'); //foo
 
+// Setting a value in an object
 $dot->set('property', 'baz');
 echo $class->property; //baz
+
+// Turning an object or an array into the dotified version of it
+$array = [
+    'foo' => [
+        'bar' => 'test',
+    ],
+];
+$dotified = Dot::dotify($array);
+
+echo $dotified['foo.bar']; //test
 ```
 
 ## Limitations and Warnings
