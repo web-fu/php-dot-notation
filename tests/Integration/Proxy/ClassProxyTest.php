@@ -19,11 +19,13 @@ use WebFu\DotNotation\Proxy\ClassProxy;
 use WebFu\DotNotation\Tests\Fixtures\ChildClass;
 
 /**
- * @coversNothing
+ * @coversDefaultClass \WebFu\DotNotation\Proxy\ClassProxy
  */
 class ClassProxyTest extends TestCase
 {
     /**
+     * @covers ::has
+     *
      * @dataProvider hasDataProvider
      */
     public function testHas(object $element, string $key, bool $expected): void
@@ -89,6 +91,9 @@ class ClassProxyTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::getKeys
+     */
     public function testGetKeys(): void
     {
         $class   = new ChildClass();
@@ -105,6 +110,8 @@ class ClassProxyTest extends TestCase
     }
 
     /**
+     * @covers ::get
+     *
      * @dataProvider getDataProvider
      */
     public function testGet(object $element, string $key, mixed $expected): void
@@ -137,6 +144,11 @@ class ClassProxyTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::set
+     *
+     * @throws UnsupportedOperationException
+     */
     public function testSet(): void
     {
         $element = new class() {
@@ -149,6 +161,11 @@ class ClassProxyTest extends TestCase
         $this->assertSame('bar', $element->property);
     }
 
+    /**
+     * @covers ::set
+     *
+     * @throws UnsupportedOperationException
+     */
     public function testSetFailIfKeyIsMethod(): void
     {
         $element = new class() {

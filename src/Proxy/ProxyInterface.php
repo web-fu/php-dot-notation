@@ -18,7 +18,7 @@ interface ProxyInterface
     public function has(int|string $key): bool;
 
     /**
-     * @return string[]
+     * @return array<int|string>
      */
     public function getKeys(): array;
 

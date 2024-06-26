@@ -17,11 +17,13 @@ use PHPUnit\Framework\TestCase;
 use WebFu\DotNotation\Proxy\ArrayProxy;
 
 /**
- * @coversNothing
+ * @coversDefaultClass \WebFu\DotNotation\Proxy\ArrayProxy
  */
 class ArrayProxyTest extends TestCase
 {
     /**
+     * @covers ::has
+     *
      * @dataProvider hasDataProvider
      *
      * @param mixed[] $element
@@ -54,6 +56,9 @@ class ArrayProxyTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::has
+     */
     public function testHasAfterChange(): void
     {
         $element = ['foo' => 'string'];
@@ -64,6 +69,8 @@ class ArrayProxyTest extends TestCase
     }
 
     /**
+     * @covers ::getKeys
+     *
      * @dataProvider getKeysProvider
      *
      * @param mixed[]           $element
@@ -103,6 +110,8 @@ class ArrayProxyTest extends TestCase
     }
 
     /**
+     * @covers ::get
+     *
      * @dataProvider getDataProvider
      *
      * @param mixed[] $element
@@ -130,6 +139,9 @@ class ArrayProxyTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::set
+     */
     public function testSet(): void
     {
         $element = ['foo' => 1];

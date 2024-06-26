@@ -20,11 +20,13 @@ use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 
 /**
- * @coversNothing
+ * @coversDefaultClass \WebFu\DotNotation\Dot
  */
 class DotTest extends TestCase
 {
     /**
+     * @covers ::get
+     *
      * @dataProvider getProvider
      *
      * @param mixed[]|object $element
@@ -80,7 +82,7 @@ class DotTest extends TestCase
             'path'     => 'method()',
             'expected' => 1,
         ];
-        yield 'class.complex' => [
+        yield 'class.array.property' => [
             'element' => new class() {
                 /**
                  * @var object[]
@@ -114,17 +116,21 @@ class DotTest extends TestCase
             'path'     => 'object',
             'expected' => (object) ['test' => 'test'],
         ];
-        yield 'array.complex' => [
-            'element' => ['objectList' => [
-                new class() {
-                    public string $string = 'test';
-                },
-            ]],
+        yield 'array.class.property' => [
+            'element' => [
+                'objectList' => [
+                    new class() {
+                        public string $string = 'test';
+                    },
+                ]],
             'path'     => 'objectList.0.string',
             'expected' => 'test',
         ];
     }
 
+    /**
+     * @covers ::get
+     */
     public function testGetWithCustomSeparator(): void
     {
         $element = ['foo' => ['bar' => 1]];
@@ -133,16 +139,13 @@ class DotTest extends TestCase
     }
 
     /**
+     * @covers ::isValidPath
+     *
      * @dataProvider pathProvider
      */
-    public function testValidatePath(string $path): void
+    public function testIsValidPath(string $path): void
     {
-        $element = [];
-        $dot     = new Dot($element);
-
-        $this->expectNotToPerformAssertions();
-
-        $dot->validatePath($path);
+        $this->assertTrue(Dot::isValidPath($path));
     }
 
     /**
@@ -150,8 +153,10 @@ class DotTest extends TestCase
      */
     public function pathProvider(): iterable
     {
+        yield 'empty' => [''];
         yield 'numeric_index_path' => ['0'];
         yield 'literal_index_path' => ['foo'];
+        yield 'unicode_path' => ['🦄'];
         yield 'method_path' => ['foo()'];
         yield 'numeric.numeric' => ['0.0'];
         yield 'numeric.literal' => ['0.bar'];
@@ -165,17 +170,13 @@ class DotTest extends TestCase
     }
 
     /**
+     * @covers ::isValidPath
+     *
      * @dataProvider invalidPathProvider
      */
-    public function testValidatePathInvalid(string $wrongPath): void
+    public function testIsValidPathIsFalse(string $wrongPath): void
     {
-        $element = [];
-        $dot     = new Dot($element);
-
-        $this->expectException(InvalidPathException::class);
-        $this->expectExceptionMessage($wrongPath.' is not a valid path');
-
-        $dot->validatePath($wrongPath);
+        $this->assertFalse(Dot::isValidPath($wrongPath));
     }
 
     /**
@@ -187,9 +188,12 @@ class DotTest extends TestCase
         yield 'illegal_character' => ['\$abc'];
         yield 'unclosed_parenthesis' => ['abc('];
         yield 'ending_with_dot' => ['abc.'];
+        yield 'chars_inside_parenthesis' => ['abc(a)'];
     }
 
     /**
+     * @covers ::get
+     *
      * @dataProvider missingChildPathProvider
      */
     public function testMissingChildPath(mixed $value, string $type): void
@@ -226,6 +230,9 @@ class DotTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::get
+     */
     public function testGetPathNotFound(): void
     {
         $element = ['exists' => 1];
@@ -235,5 +242,57 @@ class DotTest extends TestCase
         $this->expectExceptionMessage('notExists path not found');
 
         $dot->get('notExists');
+    }
+
+    /**
+     * @covers ::dotify
+     *
+     * @dataProvider elementProvider
+     *
+     * @param mixed[]|object $element
+     */
+    public function testDotify(array|object $element): void
+    {
+        $arrayDotified = Dot::dotify($element);
+
+        $this->assertEquals([
+            'foo'      => 'bar',
+            'baz.qux'  => 'quux',
+            'baz.quuz' => 'corge',
+        ], $arrayDotified);
+    }
+
+    /**
+     * @return iterable<array{element: mixed[]|object}>
+     */
+    public function elementProvider(): iterable
+    {
+        yield 'array' => [
+            'element' => [
+                'foo' => 'bar',
+                'baz' => [
+                    'qux'  => 'quux',
+                    'quuz' => 'corge',
+                ],
+            ],
+        ];
+        yield 'object' => [
+            'element' => (object) [
+                'foo' => 'bar',
+                'baz' => (object) [
+                    'qux'  => 'quux',
+                    'quuz' => 'corge',
+                ],
+            ],
+        ];
+        yield 'array_and_object' => [
+            'element' => [
+                'foo' => 'bar',
+                'baz' => (object) [
+                    'qux'  => 'quux',
+                    'quuz' => 'corge',
+                ],
+            ],
+        ];
     }
 }

@@ -33,7 +33,9 @@ final class Dot
 
     public function get(string $path): mixed
     {
-        $this->validatePath($path);
+        if (!self::isValidPath($path, $this->separator)) {
+            throw new InvalidPathException('Invalid path: '.$path);
+        }
 
         $pathTracks = explode($this->separator, $path);
         $track      = array_shift($pathTracks);
@@ -61,13 +63,39 @@ final class Dot
         return $next->get(implode($this->separator, $pathTracks));
     }
 
-    public function validatePath(string $path): void
+    public static function isValidPath(string $path, string $separator = '.'): bool
     {
-        $separatorEscaped = preg_quote($this->separator);
-
-        preg_match('/(([a-zA-Z_][a-zA-Z_0-9]*(\(\))?)|([-+]?\d+))('.$separatorEscaped.'(([a-zA-Z_][a-zA-Z_0-9]*(\(\))?)|([-+]?\d+)))*/', $path, $matches);
-        if (!count($matches) || $matches[0] !== $path) {
-            throw new InvalidPathException($path.' is not a valid path');
+        if ('' === $path) {
+            return true;
         }
+
+        $separatorEscaped = preg_quote($separator);
+
+        preg_match('/(([a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*(\(\))?)|([-+]?\d+))('.$separatorEscaped.'(([a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*(\(\))?)|([-+]?\d+)))*/', $path, $matches);
+
+        return count($matches) && $matches[0] === $path;
+    }
+
+    /**
+     * @param mixed[]|object   $element
+     * @param non-empty-string $separator
+     *
+     * @return mixed[]
+     */
+    public static function dotify(array|object $element, string $prefix = '', string $separator = '.'): array
+    {
+        $dot    = new self($element, $separator);
+        $keys   = $dot->wrapper->getKeys();
+        $result = [];
+        foreach ($keys as $key) {
+            $value = $dot->get((string) $key);
+            if (is_array($value) || is_object($value)) {
+                $result = array_merge($result, self::dotify($value, $prefix.$key.$separator));
+            } else {
+                $result[$prefix.$key] = $value;
+            }
+        }
+
+        return $result;
     }
 }
