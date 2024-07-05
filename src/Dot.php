@@ -37,7 +37,7 @@ final class Dot
         $track      = array_shift($pathTracks);
 
         if (!$this->proxy->has($track)) {
-            throw new PathNotFoundException($track.' path not found');
+            throw new PathNotFoundException($path.' path not found');
         }
 
         $value = $this->proxy->get($track);
@@ -57,6 +57,23 @@ final class Dot
         $next = new self($value);
 
         return $next->get(implode($this->separator, $pathTracks));
+    }
+
+    public function set(string $path, mixed $value): self
+    {
+        $pathTracks = explode($this->separator, $path);
+        $track      = array_pop($pathTracks);
+
+        $source = $this->proxy;
+
+        if (count($pathTracks)) {
+            $element = $this->get(implode($this->separator, $pathTracks));
+            $source  = new self($element);
+        }
+
+        $source->set($track, $value);
+
+        return $this;
     }
 
     /**

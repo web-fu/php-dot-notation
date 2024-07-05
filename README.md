@@ -55,6 +55,8 @@ $dotified = Dot::dotify($array);
 echo $dotified['foo.bar']; //test
 ```
 
+See `/examples` folder for full examples
+
 ## Limitations and Warnings
 This tool have some limitations: 
 
