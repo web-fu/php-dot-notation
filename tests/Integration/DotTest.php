@@ -142,6 +142,7 @@ class DotTest extends TestCase
      * @covers ::set
      *
      * @dataProvider setProvider
+     * @param mixed[]|object $element
      */
     public function testSet(array|object $element, string $path, mixed $value): void
     {
@@ -151,7 +152,7 @@ class DotTest extends TestCase
     }
 
     /**
-     * @return iterable<array{element: mixed[]|object, path: string, value: mixed, expected: mixed[]|object}>
+     * @return iterable<array{element: mixed[]|object, path: string, value: mixed}>
      */
     public function setProvider(): iterable
     {

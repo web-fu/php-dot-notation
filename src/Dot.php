@@ -68,6 +68,13 @@ final class Dot
 
         if (count($pathTracks)) {
             $element = $this->get(implode($this->separator, $pathTracks));
+            if (
+                !is_array($element)
+                && !is_object($element)
+            ) {
+                $type = get_debug_type($element);
+                throw new InvalidPathException('Element of type '.$type.' has no child element');
+            }
             $source  = new self($element);
         }
 
@@ -117,6 +124,7 @@ final class Dot
 
     /**
      * @param mixed[] $dotified
+     * @param non-empty-string $separator
      *
      * @return mixed[]
      */
