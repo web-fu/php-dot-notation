@@ -142,6 +142,7 @@ class DotTest extends TestCase
      * @covers ::set
      *
      * @dataProvider setProvider
+     *
      * @param mixed[]|object $element
      */
     public function testSet(array|object $element, string $path, mixed $value): void

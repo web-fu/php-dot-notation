@@ -75,7 +75,7 @@ final class Dot
                 $type = get_debug_type($element);
                 throw new InvalidPathException('Element of type '.$type.' has no child element');
             }
-            $source  = new self($element);
+            $source = new self($element);
         }
 
         $source->set($track, $value);
@@ -123,7 +123,7 @@ final class Dot
     }
 
     /**
-     * @param mixed[] $dotified
+     * @param mixed[]          $dotified
      * @param non-empty-string $separator
      *
      * @return mixed[]
