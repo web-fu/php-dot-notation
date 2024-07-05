@@ -114,4 +114,34 @@ final class Dot
 
         return $result;
     }
+
+    /**
+     * @param mixed[] $dotified
+     *
+     * @return mixed[]
+     */
+    public static function undotify(array $dotified, string $separator = '.'): array
+    {
+        $result = [];
+        foreach ($dotified as $path => $value) {
+            // extract keys
+            $keys = explode($separator, $path);
+            // reverse keys for assignments
+            $keys = array_reverse($keys);
+
+            // set initial value
+            $lastVal = $value;
+            foreach ($keys as $key) {
+                // wrap value with key over each iteration
+                $lastVal = [
+                    $key => $lastVal,
+                ];
+            }
+
+            // merge result
+            $result = array_merge_recursive($result, $lastVal);
+        }
+
+        return $result;
+    }
 }

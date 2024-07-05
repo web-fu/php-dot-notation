@@ -53,6 +53,11 @@ $array = [
 $dotified = Dot::dotify($array);
 
 echo $dotified['foo.bar']; //test
+
+// Turning a dotified array into a normal array
+$normal = Dot::undotify($dotified);
+
+echo $normal['foo']['bar']; //test
 ```
 
 See `/examples` folder for full examples

@@ -388,4 +388,23 @@ class DotTest extends TestCase
             ],
         ];
     }
+
+    public function testUndotify(): void
+    {
+        $arrayDotified = [
+            'foo'      => 'bar',
+            'baz.qux'  => 'quux',
+            'baz.quuz' => 'corge',
+        ];
+
+        $array = Dot::undotify($arrayDotified);
+
+        $this->assertEquals([
+            'foo' => 'bar',
+            'baz' => [
+                'qux'  => 'quux',
+                'quuz' => 'corge',
+            ],
+        ], $array);
+    }
 }
