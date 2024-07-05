@@ -139,6 +139,101 @@ class DotTest extends TestCase
     }
 
     /**
+     * @covers ::set
+     *
+     * @dataProvider setProvider
+     *
+     * @param mixed[]|object $element
+     */
+    public function testSet(array|object $element, string $path, mixed $value): void
+    {
+        $dot    = new Dot($element);
+        $actual = $dot->set($path, $value);
+        $this->assertEquals($value, $actual->get($path));
+    }
+
+    /**
+     * @return iterable<array{element: mixed[]|object, path: string, value: mixed}>
+     */
+    public function setProvider(): iterable
+    {
+        yield 'class.scalar' => [
+            'element' => new class() {
+                public string $scalar = 'scalar';
+            },
+            'path'  => 'scalar',
+            'value' => 'new',
+        ];
+        yield 'class.array' => [
+            'element' => new class() {
+                /**
+                 * @var int[]
+                 */
+                public array $list = [0, 1, 2];
+            },
+            'path'  => 'list',
+            'value' => [3, 4, 5],
+        ];
+        yield 'class.class' => [
+            'element' => new class() {
+                public object $object;
+
+                public function __construct()
+                {
+                    $this->object       = new stdClass();
+                    $this->object->test = 'test';
+                }
+            },
+            'path'  => 'object',
+            'value' => (object) ['new' => 'new'],
+        ];
+        yield 'class.array.property' => [
+            'element' => new class() {
+                /**
+                 * @var object[]
+                 */
+                public array $objectList;
+
+                public function __construct()
+                {
+                    $this->objectList = [
+                        new class() {
+                            public string $string = 'test';
+                        },
+                    ];
+                }
+            },
+            'path'  => 'objectList.0.string',
+            'value' => 'new',
+        ];
+        yield 'array.scalar' => [
+            'element' => ['scalar' => 'scalar'],
+            'path'    => 'scalar',
+            'value'   => 'new',
+        ];
+        yield 'array.array' => [
+            'element' => ['list' => [0, 1, 2]],
+            'path'    => 'list',
+            'value'   => [3, 4, 5],
+        ];
+        yield 'array.class' => [
+            'element' => ['object' => (object) ['test' => 'test']],
+            'path'    => 'object',
+            'value'   => (object) ['new' => 'new'],
+        ];
+        yield 'array.class.property' => [
+            'element' => [
+                'objectList' => [
+                    new class() {
+                        public string $string = 'test';
+                    },
+                ]],
+            'path'  => 'objectList.0.string',
+            'value' => 'new',
+        ];
+    }
+
+    /**
      * @covers ::isValidPath
      *
      * @dataProvider pathProvider
@@ -294,5 +389,24 @@ class DotTest extends TestCase
                 ],
             ],
         ];
+    }
+
+    public function testUndotify(): void
+    {
+        $arrayDotified = [
+            'foo'      => 'bar',
+            'baz.qux'  => 'quux',
+            'baz.quuz' => 'corge',
+        ];
+
+        $array = Dot::undotify($arrayDotified);
+
+        $this->assertEquals([
+            'foo' => 'bar',
+            'baz' => [
+                'qux'  => 'quux',
+                'quuz' => 'corge',
+            ],
+        ], $array);
     }
 }

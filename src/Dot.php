@@ -37,7 +37,7 @@ final class Dot
         $track      = array_shift($pathTracks);
 
         if (!$this->proxy->has($track)) {
-            throw new PathNotFoundException($track.' path not found');
+            throw new PathNotFoundException($path.' path not found');
         }
 
         $value = $this->proxy->get($track);
@@ -57,6 +57,30 @@ final class Dot
         $next = new self($value);
 
         return $next->get(implode($this->separator, $pathTracks));
+    }
+
+    public function set(string $path, mixed $value): self
+    {
+        $pathTracks = explode($this->separator, $path);
+        $track      = array_pop($pathTracks);
+
+        $source = $this->proxy;
+
+        if (count($pathTracks)) {
+            $element = $this->get(implode($this->separator, $pathTracks));
+            if (
+                !is_array($element)
+                && !is_object($element)
+            ) {
+                $type = get_debug_type($element);
+                throw new InvalidPathException('Element of type '.$type.' has no child element');
+            }
+            $source = new self($element);
+        }
+
+        $source->set($track, $value);
+
+        return $this;
     }
 
     /**
@@ -93,6 +117,37 @@ final class Dot
             } else {
                 $result[$prefix.$key] = $value;
             }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param mixed[]          $dotified
+     * @param non-empty-string $separator
+     *
+     * @return mixed[]
+     */
+    public static function undotify(array $dotified, string $separator = '.'): array
+    {
+        $result = [];
+        foreach ($dotified as $path => $value) {
+            // extract keys
+            $keys = explode($separator, $path);
+            // reverse keys for assignments
+            $keys = array_reverse($keys);
+
+            // set initial value
+            $lastVal = $value;
+            foreach ($keys as $key) {
+                // wrap value with key over each iteration
+                $lastVal = [
+                    $key => $lastVal,
+                ];
+            }
+
+            // merge result
+            $result = array_merge_recursive($result, $lastVal);
         }
 
         return $result;
