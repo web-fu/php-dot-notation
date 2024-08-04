@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace WebFu\DotNotation\Proxy;
 
+use WebFu\Reflection\ReflectionType;
+
 interface ProxyInterface
 {
     public function has(int|string $key): bool;
@@ -25,4 +27,6 @@ interface ProxyInterface
     public function get(string $key): mixed;
 
     public function set(string $key, mixed $value): self;
+
+    public function getReflectionType(string $key): ReflectionType|null;
 }

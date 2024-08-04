@@ -14,9 +14,11 @@ declare(strict_types=1);
 namespace WebFu\DotNotation\Tests\Integration\Proxy;
 
 use PHPUnit\Framework\TestCase;
+use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\DotNotation\Proxy\ClassProxy;
 use WebFu\DotNotation\Tests\Fixtures\ChildClass;
+use WebFu\Reflection\ReflectionType;
 
 /**
  * @coversDefaultClass \WebFu\DotNotation\Proxy\ClassProxy
@@ -30,8 +32,8 @@ class ClassProxyTest extends TestCase
      */
     public function testHas(object $element, string $key, bool $expected): void
     {
-        $wrapper = new ClassProxy($element);
-        $this->assertSame($expected, $wrapper->has($key));
+        $proxy = new ClassProxy($element);
+        $this->assertSame($expected, $proxy->has($key));
     }
 
     /**
@@ -96,8 +98,8 @@ class ClassProxyTest extends TestCase
      */
     public function testGetKeys(): void
     {
-        $class   = new ChildClass();
-        $wrapper = new ClassProxy($class);
+        $class = new ChildClass();
+        $proxy = new ClassProxy($class);
 
         $this->assertSame([
             'public',
@@ -106,7 +108,7 @@ class ClassProxyTest extends TestCase
             'public()',
             'publicParent()',
             'publicTrait()',
-        ], $wrapper->getKeys());
+        ], $proxy->getKeys());
     }
 
     /**
@@ -116,8 +118,8 @@ class ClassProxyTest extends TestCase
      */
     public function testGet(object $element, string $key, mixed $expected): void
     {
-        $wrapper = new ClassProxy($element);
-        $this->assertSame($expected, $wrapper->get($key));
+        $proxy = new ClassProxy($element);
+        $this->assertSame($expected, $proxy->get($key));
     }
 
     /**
@@ -145,9 +147,22 @@ class ClassProxyTest extends TestCase
     }
 
     /**
+     * @covers ::get
+     */
+    public function testGetFailIfKeyDoNotExists(): void
+    {
+        $element = new class() {
+        };
+
+        $this->expectException(InvalidPathException::class);
+        $this->expectExceptionMessage('Key `property` not found');
+
+        $proxy = new ClassProxy($element);
+        $proxy->get('property');
+    }
+
+    /**
      * @covers ::set
-     *
-     * @throws UnsupportedOperationException
      */
     public function testSet(): void
     {
@@ -155,16 +170,26 @@ class ClassProxyTest extends TestCase
             public string $property = 'foo';
         };
 
-        $wrapper = new ClassProxy($element);
-        $wrapper->set('property', 'bar');
+        $proxy = new ClassProxy($element);
+        $proxy->set('property', 'bar');
 
         $this->assertSame('bar', $element->property);
     }
 
+    public function testSetFailIfKeyDoNotExists(): void
+    {
+        $element = new class() {
+        };
+
+        $this->expectException(InvalidPathException::class);
+        $this->expectExceptionMessage('Key `property` not found');
+
+        $proxy = new ClassProxy($element);
+        $proxy->set('property', 'bar');
+    }
+
     /**
      * @covers ::set
-     *
-     * @throws UnsupportedOperationException
      */
     public function testSetFailIfKeyIsMethod(): void
     {
@@ -177,7 +202,43 @@ class ClassProxyTest extends TestCase
         $this->expectException(UnsupportedOperationException::class);
         $this->expectExceptionMessage('Cannot set a class method');
 
-        $wrapper = new ClassProxy($element);
-        $wrapper->set('method()', 'bar');
+        $proxy = new ClassProxy($element);
+        $proxy->set('method()', 'bar');
+    }
+
+    /**
+     * @covers ::getReflectionType
+     */
+    public function testGetReflectionType(): void
+    {
+        $element = new class() {
+            public string $property = 'foo';
+
+            public function method(): string
+            {
+                return 'foo';
+            }
+        };
+
+        $proxy = new ClassProxy($element);
+
+        $expected = new ReflectionType(['string']);
+        $this->assertEquals($expected, $proxy->getReflectionType('property'));
+        $this->assertEquals($expected, $proxy->getReflectionType('method()'));
+    }
+
+    /**
+     * @covers ::getReflectionType
+     */
+    public function testGetReflectionTypeFailIfKeyDoNotExists(): void
+    {
+        $element = new class() {
+        };
+
+        $this->expectException(InvalidPathException::class);
+        $this->expectExceptionMessage('Key `property` not found');
+
+        $proxy = new ClassProxy($element);
+        $proxy->getReflectionType('property');
     }
 }

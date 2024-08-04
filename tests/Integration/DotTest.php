@@ -16,8 +16,8 @@ namespace WebFu\DotNotation\Tests\Integration;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use WebFu\DotNotation\Dot;
-use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
+use WebFu\Reflection\ReflectionType;
 
 /**
  * @coversDefaultClass \WebFu\DotNotation\Dot
@@ -27,7 +27,7 @@ class DotTest extends TestCase
     /**
      * @covers ::get
      *
-     * @dataProvider getProvider
+     * @dataProvider getDataProvider
      *
      * @param mixed[]|object $element
      */
@@ -40,7 +40,7 @@ class DotTest extends TestCase
     /**
      * @return iterable<array{element: mixed[]|object, path: string, expected: mixed}>
      */
-    public function getProvider(): iterable
+    public function getDataProvider(): iterable
     {
         yield 'class.scalar' => [
             'element' => new class() {
@@ -139,154 +139,6 @@ class DotTest extends TestCase
     }
 
     /**
-     * @covers ::set
-     *
-     * @dataProvider setProvider
-     *
-     * @param mixed[]|object $element
-     */
-    public function testSet(array|object $element, string $path, mixed $value): void
-    {
-        $dot    = new Dot($element);
-        $actual = $dot->set($path, $value);
-        $this->assertEquals($value, $actual->get($path));
-    }
-
-    /**
-     * @return iterable<array{element: mixed[]|object, path: string, value: mixed}>
-     */
-    public function setProvider(): iterable
-    {
-        yield 'class.scalar' => [
-            'element' => new class() {
-                public string $scalar = 'scalar';
-            },
-            'path'  => 'scalar',
-            'value' => 'new',
-        ];
-        yield 'class.array' => [
-            'element' => new class() {
-                /**
-                 * @var int[]
-                 */
-                public array $list = [0, 1, 2];
-            },
-            'path'  => 'list',
-            'value' => [3, 4, 5],
-        ];
-        yield 'class.class' => [
-            'element' => new class() {
-                public object $object;
-
-                public function __construct()
-                {
-                    $this->object       = new stdClass();
-                    $this->object->test = 'test';
-                }
-            },
-            'path'  => 'object',
-            'value' => (object) ['new' => 'new'],
-        ];
-        yield 'class.array.property' => [
-            'element' => new class() {
-                /**
-                 * @var object[]
-                 */
-                public array $objectList;
-
-                public function __construct()
-                {
-                    $this->objectList = [
-                        new class() {
-                            public string $string = 'test';
-                        },
-                    ];
-                }
-            },
-            'path'  => 'objectList.0.string',
-            'value' => 'new',
-        ];
-        yield 'array.scalar' => [
-            'element' => ['scalar' => 'scalar'],
-            'path'    => 'scalar',
-            'value'   => 'new',
-        ];
-        yield 'array.array' => [
-            'element' => ['list' => [0, 1, 2]],
-            'path'    => 'list',
-            'value'   => [3, 4, 5],
-        ];
-        yield 'array.class' => [
-            'element' => ['object' => (object) ['test' => 'test']],
-            'path'    => 'object',
-            'value'   => (object) ['new' => 'new'],
-        ];
-        yield 'array.class.property' => [
-            'element' => [
-                'objectList' => [
-                    new class() {
-                        public string $string = 'test';
-                    },
-                ]],
-            'path'  => 'objectList.0.string',
-            'value' => 'new',
-        ];
-    }
-
-    /**
-     * @covers ::isValidPath
-     *
-     * @dataProvider pathProvider
-     */
-    public function testIsValidPath(string $path): void
-    {
-        $this->assertTrue(Dot::isValidPath($path));
-    }
-
-    /**
-     * @return iterable<string[]>
-     */
-    public function pathProvider(): iterable
-    {
-        yield 'empty' => [''];
-        yield 'numeric_index_path' => ['0'];
-        yield 'literal_index_path' => ['foo'];
-        yield 'unicode_path' => ['🦄'];
-        yield 'method_path' => ['foo()'];
-        yield 'numeric.numeric' => ['0.0'];
-        yield 'numeric.literal' => ['0.bar'];
-        yield 'numeric.method' => ['0.bar()'];
-        yield 'literal.numeric' => ['foo.0'];
-        yield 'literal.literal' => ['foo.bar'];
-        yield 'literal.method' => ['foo.bar()'];
-        yield 'method.numeric' => ['foo().0'];
-        yield 'method.literal' => ['foo().bar'];
-        yield 'method.method' => ['foo().bar()'];
-    }
-
-    /**
-     * @covers ::isValidPath
-     *
-     * @dataProvider invalidPathProvider
-     */
-    public function testIsValidPathIsFalse(string $wrongPath): void
-    {
-        $this->assertFalse(Dot::isValidPath($wrongPath));
-    }
-
-    /**
-     * @return iterable<string[]>
-     */
-    public function invalidPathProvider(): iterable
-    {
-        yield 'starting_with_number' => ['0abc'];
-        yield 'illegal_character' => ['\$abc'];
-        yield 'unclosed_parenthesis' => ['abc('];
-        yield 'ending_with_dot' => ['abc.'];
-        yield 'chars_inside_parenthesis' => ['abc(a)'];
-    }
-
-    /**
      * @covers ::get
      *
      * @dataProvider missingChildPathProvider
@@ -296,8 +148,8 @@ class DotTest extends TestCase
         $element = ['foo' => $value];
         $dot     = new Dot($element);
 
-        $this->expectException(InvalidPathException::class);
-        $this->expectExceptionMessage('Element of type '.$type.' has no child element');
+        $this->expectException(PathNotFoundException::class);
+        $this->expectExceptionMessage('Path `foo.bar` not found');
 
         $dot->get('foo.bar');
     }
@@ -334,9 +186,302 @@ class DotTest extends TestCase
         $dot     = new Dot($element);
 
         $this->expectException(PathNotFoundException::class);
-        $this->expectExceptionMessage('notExists path not found');
+        $this->expectExceptionMessage('Path `notExists` not found');
 
         $dot->get('notExists');
+    }
+
+    /**
+     * @covers ::set
+     *
+     * @dataProvider setDataProvider
+     *
+     * @param mixed[]|object $element
+     */
+    public function testSet(array|object $element, string $path, mixed $expected): void
+    {
+        $dot    = new Dot($element);
+        $actual = $dot->set($path, $expected);
+        $this->assertEquals($expected, $actual->get($path));
+    }
+
+    /**
+     * @return iterable<array{element: mixed[]|object, path: string, expected: mixed}>
+     */
+    public function setDataProvider(): iterable
+    {
+        yield 'class.scalar' => [
+            'element' => new class() {
+                public string $scalar = 'scalar';
+            },
+            'path'     => 'scalar',
+            'expected' => 'new',
+        ];
+        yield 'class.array' => [
+            'element' => new class() {
+                /**
+                 * @var int[]
+                 */
+                public array $list = [0, 1, 2];
+            },
+            'path'     => 'list',
+            'expected' => [3, 4, 5],
+        ];
+        yield 'class.class' => [
+            'element' => new class() {
+                public object $object;
+
+                public function __construct()
+                {
+                    $this->object       = new stdClass();
+                    $this->object->test = 'test';
+                }
+            },
+            'path'     => 'object',
+            'expected' => (object) ['new' => 'new'],
+        ];
+        yield 'class.array.property' => [
+            'element' => new class() {
+                /**
+                 * @var object[]
+                 */
+                public array $objectList;
+
+                public function __construct()
+                {
+                    $this->objectList = [
+                        new class() {
+                            public string $string = 'test';
+                        },
+                    ];
+                }
+            },
+            'path'     => 'objectList.0.string',
+            'expected' => 'new',
+        ];
+        yield 'array.scalar' => [
+            'element'  => ['scalar' => 'scalar'],
+            'path'     => 'scalar',
+            'expected' => 'new',
+        ];
+        yield 'array.array' => [
+            'element'  => ['list' => [0, 1, 2]],
+            'path'     => 'list',
+            'expected' => [3, 4, 5],
+        ];
+        yield 'array.class' => [
+            'element'  => ['object' => (object) ['test' => 'test']],
+            'path'     => 'object',
+            'expected' => (object) ['new' => 'new'],
+        ];
+        yield 'array.class.property' => [
+            'element' => [
+                'objectList' => [
+                    new class() {
+                        public string $string = 'test';
+                    },
+                ]],
+            'path'     => 'objectList.0.string',
+            'expected' => 'new',
+        ];
+    }
+
+    /**
+     * @covers ::has
+     *
+     * @dataProvider hasDataProvider
+     *
+     * @param mixed[]|object $element
+     */
+    public function testHas(array|object $element, string $path, bool $expected): void
+    {
+        $dot    = new Dot($element);
+        $actual = $dot->has($path);
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * @return iterable<array{element: mixed[]|object, path: string, expected: bool}>
+     */
+    public function hasDataProvider(): iterable
+    {
+        yield 'class.scalar.exists' => [
+            'element' => new class() {
+                public string $scalar = 'scalar';
+            },
+            'path'     => 'scalar',
+            'expected' => true,
+        ];
+        yield 'class.scalar.not-exists' => [
+            'element' => new class() {
+                public string $scalar = 'scalar';
+            },
+            'path'     => 'notExists',
+            'expected' => false,
+        ];
+        yield 'class.array.exists' => [
+            'element' => new class() {
+                /**
+                 * @var int[]
+                 */
+                public array $list = [0, 1, 2];
+            },
+            'path'     => 'list',
+            'expected' => true,
+        ];
+        yield 'class.array.not-exists' => [
+            'element' => new class() {
+                /**
+                 * @var int[]
+                 */
+                public array $list = [0, 1, 2];
+            },
+            'path'     => 'notExists',
+            'expected' => false,
+        ];
+        yield 'class.class.exists' => [
+            'element' => new class() {
+                public object $object;
+
+                public function __construct()
+                {
+                    $this->object       = new stdClass();
+                    $this->object->test = 'test';
+                }
+            },
+            'path'     => 'object',
+            'expected' => true,
+        ];
+        yield 'class.class.not-exists' => [
+            'element' => new class() {
+                public object $object;
+
+                public function __construct()
+                {
+                    $this->object       = new stdClass();
+                    $this->object->test = 'test';
+                }
+            },
+            'path'     => 'notExists',
+            'expected' => false,
+        ];
+        yield 'class.method.exists' => [
+            'element' => new class() {
+                public function method(): void
+                {
+                }
+            },
+            'path'     => 'method()',
+            'expected' => true,
+        ];
+        yield 'class.method.not-exists' => [
+            'element' => new class() {
+                public function method(): void
+                {
+                }
+            },
+            'path'     => 'notExists()',
+            'expected' => false,
+        ];
+        yield 'class.array.property.exists' => [
+            'element' => new class() {
+                /**
+                 * @var object[]
+                 */
+                public array $objectList;
+
+                public function __construct()
+                {
+                    $this->objectList = [
+                        new class() {
+                            public string $string = 'test';
+                        },
+                    ];
+                }
+            },
+            'path'     => 'objectList.0.string',
+            'expected' => true,
+        ];
+        yield 'class.array.property.not-exists' => [
+            'element' => new class() {
+                /**
+                 * @var object[]
+                 */
+                public array $objectList;
+
+                public function __construct()
+                {
+                    $this->objectList = [
+                        new class() {
+                            public string $string = 'test';
+                        },
+                    ];
+                }
+            },
+            'path'     => 'objectList.0.notExists',
+            'expected' => false,
+        ];
+        yield 'array.scalar.exists' => [
+            'element'  => ['scalar' => 'scalar'],
+            'path'     => 'scalar',
+            'expected' => true,
+        ];
+        yield 'array.scalar.not-exists' => [
+            'element'  => ['scalar' => 'scalar'],
+            'path'     => 'notExists',
+            'expected' => false,
+        ];
+        yield 'array.array.exists' => [
+            'element'  => ['list' => [0, 1, 2]],
+            'path'     => 'list',
+            'expected' => true,
+        ];
+        yield 'array.array.not-exists' => [
+            'element'  => ['list' => [0, 1, 2]],
+            'path'     => 'notExists',
+            'expected' => false,
+        ];
+        yield 'array.class.exists' => [
+            'element'  => ['object' => (object) ['test' => 'test']],
+            'path'     => 'object',
+            'expected' => true,
+        ];
+        yield 'array.class.not-exists' => [
+            'element'  => ['object' => (object) ['test' => 'test']],
+            'path'     => 'notExists',
+            'expected' => false,
+        ];
+        yield 'array.class.property.exists' => [
+            'element' => [
+                'objectList' => [
+                    new class() {
+                        public string $string = 'test';
+                    },
+                ]],
+            'path'     => 'objectList.0.string',
+            'expected' => true,
+        ];
+        yield 'array.class.property.not-exists' => [
+            'element' => [
+                'objectList' => [
+                    new class() {
+                        public string $string = 'test';
+                    },
+                ]],
+            'path'     => 'objectList.0.notExists',
+            'expected' => false,
+        ];
+    }
+
+    public function testGetReflectionType(): void
+    {
+        $element = ['foo' => 1];
+        $dot     = new Dot($element);
+        $type    = $dot->getReflectionType('foo');
+
+        $expected = new ReflectionType(['int']);
+
+        $this->assertEquals($expected, $type);
     }
 
     /**

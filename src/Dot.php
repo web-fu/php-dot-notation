@@ -17,6 +17,7 @@ use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Proxy\ProxyFactory;
 use WebFu\DotNotation\Proxy\ProxyInterface;
+use WebFu\Reflection\ReflectionType;
 
 final class Dot
 {
@@ -33,12 +34,12 @@ final class Dot
 
     public function get(string $path): mixed
     {
+        if (!$this->has($path)) {
+            throw new PathNotFoundException('Path `'.$path.'` not found');
+        }
+
         $pathTracks = explode($this->separator, $path);
         $track      = array_shift($pathTracks);
-
-        if (!$this->proxy->has($track)) {
-            throw new PathNotFoundException($path.' path not found');
-        }
 
         $value = $this->proxy->get($track);
 
@@ -46,13 +47,7 @@ final class Dot
             return $value;
         }
 
-        if (
-            !is_array($value)
-            && !is_object($value)
-        ) {
-            $type = get_debug_type($value);
-            throw new InvalidPathException('Element of type '.$type.' has no child element');
-        }
+        assert(is_array($value) || is_object($value));
 
         $next = new self($value);
 
@@ -60,6 +55,57 @@ final class Dot
     }
 
     public function set(string $path, mixed $value): self
+    {
+        if (!$this->has($path)) {
+            throw new PathNotFoundException('Path `'.$path.'` not found');
+        }
+
+        $pathTracks = explode($this->separator, $path);
+        $track      = array_pop($pathTracks);
+
+        $source = $this->proxy;
+
+        if (count($pathTracks)) {
+            $element = $this->get(implode($this->separator, $pathTracks));
+
+            assert(is_array($element) || is_object($element));
+
+            $source = new self($element);
+        }
+
+        $source->set($track, $value);
+
+        return $this;
+    }
+
+    public function has(string $path): bool
+    {
+        $pathTracks = explode($this->separator, $path);
+        $track      = array_shift($pathTracks);
+
+        if (!$this->proxy->has($track)) {
+            return false;
+        }
+
+        $value = $this->proxy->get($track);
+
+        if (!count($pathTracks)) {
+            return true;
+        }
+
+        if (
+            !is_array($value)
+            && !is_object($value)
+        ) {
+            return false;
+        }
+
+        $next = new self($value);
+
+        return $next->has(implode($this->separator, $pathTracks));
+    }
+
+    public function getReflectionType(string $path): ReflectionType|null
     {
         $pathTracks = explode($this->separator, $path);
         $track      = array_pop($pathTracks);
@@ -78,25 +124,7 @@ final class Dot
             $source = new self($element);
         }
 
-        $source->set($track, $value);
-
-        return $this;
-    }
-
-    /**
-     * @deprecated to be removed in the next major version
-     */
-    public static function isValidPath(string $path, string $separator = '.'): bool
-    {
-        if ('' === $path) {
-            return true;
-        }
-
-        $separatorEscaped = preg_quote($separator);
-
-        preg_match('/(([a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*(\(\))?)|([-+]?\d+))('.$separatorEscaped.'(([a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*(\(\))?)|([-+]?\d+)))*/', $path, $matches);
-
-        return count($matches) && $matches[0] === $path;
+        return $source->getReflectionType($track);
     }
 
     /**
