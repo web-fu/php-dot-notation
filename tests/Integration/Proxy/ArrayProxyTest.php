@@ -14,7 +14,9 @@ declare(strict_types=1);
 namespace WebFu\DotNotation\Tests\Integration\Proxy;
 
 use PHPUnit\Framework\TestCase;
+use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Proxy\ArrayProxy;
+use WebFu\Reflection\ReflectionType;
 
 /**
  * @coversDefaultClass \WebFu\DotNotation\Proxy\ArrayProxy
@@ -140,6 +142,20 @@ class ArrayProxyTest extends TestCase
     }
 
     /**
+     * @covers ::get
+     */
+    public function testGetFailIfKeyDoNotExists(): void
+    {
+        $element = [];
+
+        $this->expectExceptionMessage('Key \'foo\' not found');
+        $this->expectException(InvalidPathException::class);
+
+        $wrapper = new ArrayProxy($element);
+        $wrapper->get('foo');
+    }
+
+    /**
      * @covers ::set
      */
     public function testSet(): void
@@ -148,5 +164,46 @@ class ArrayProxyTest extends TestCase
         $wrapper = new ArrayProxy($element);
         $wrapper->set('foo', 2);
         $this->assertSame(2, $element['foo']);
+    }
+
+    /**
+     * @covers ::set
+     */
+    public function testSetFailIfKeyDoNotExists(): void
+    {
+        $element = [];
+
+        $this->expectExceptionMessage('Key \'foo\' not found');
+        $this->expectException(InvalidPathException::class);
+
+        $wrapper = new ArrayProxy($element);
+        $wrapper->set('foo', 2);
+    }
+
+    /**
+     * @covers ::getReflectionType
+     */
+    public function testGetReflectionType(): void
+    {
+        $element = ['foo' => 'string'];
+
+        $proxy = new ArrayProxy($element);
+
+        $expected = new ReflectionType(['string']);
+        $this->assertEquals($expected, $proxy->getReflectionType('foo'));
+    }
+
+    /**
+     * @covers ::getReflectionType
+     */
+    public function testGetReflectionTypeFailIfKeyDoNotExists(): void
+    {
+        $element = [];
+
+        $this->expectExceptionMessage('Key \'foo\' not found');
+        $this->expectException(InvalidPathException::class);
+
+        $proxy = new ArrayProxy($element);
+        $proxy->getReflectionType('foo');
     }
 }

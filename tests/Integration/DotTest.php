@@ -18,6 +18,7 @@ use stdClass;
 use WebFu\DotNotation\Dot;
 use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
+use WebFu\Reflection\ReflectionType;
 
 /**
  * @coversDefaultClass \WebFu\DotNotation\Dot
@@ -126,6 +127,17 @@ class DotTest extends TestCase
             'path'     => 'objectList.0.string',
             'expected' => 'test',
         ];
+    }
+
+    public function testGetReflectionType(): void
+    {
+        $element = ['foo' => 1];
+        $dot     = new Dot($element);
+        $type    = $dot->getReflectionType('foo');
+
+        $expected = new ReflectionType(['int']);
+
+        $this->assertEquals($expected, $type);
     }
 
     /**
