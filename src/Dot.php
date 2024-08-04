@@ -34,25 +34,17 @@ final class Dot
 
     public function get(string $path): mixed
     {
+        if (!$this->has($path)) {
+            throw new PathNotFoundException('Path `'.$path.'` not found');
+        }
+
         $pathTracks = explode($this->separator, $path);
         $track      = array_shift($pathTracks);
-
-        if (!$this->proxy->has($track)) {
-            throw new PathNotFoundException($path.' path not found');
-        }
 
         $value = $this->proxy->get($track);
 
         if (!count($pathTracks)) {
             return $value;
-        }
-
-        if (
-            !is_array($value)
-            && !is_object($value)
-        ) {
-            $type = get_debug_type($value);
-            throw new InvalidPathException('Element of type '.$type.' has no child element');
         }
 
         $next = new self($value);
@@ -62,6 +54,10 @@ final class Dot
 
     public function set(string $path, mixed $value): self
     {
+        if (!$this->has($path)) {
+            throw new PathNotFoundException('Path `'.$path.'` not found');
+        }
+
         $pathTracks = explode($this->separator, $path);
         $track      = array_pop($pathTracks);
 
@@ -69,19 +65,39 @@ final class Dot
 
         if (count($pathTracks)) {
             $element = $this->get(implode($this->separator, $pathTracks));
-            if (
-                !is_array($element)
-                && !is_object($element)
-            ) {
-                $type = get_debug_type($element);
-                throw new InvalidPathException('Element of type '.$type.' has no child element');
-            }
-            $source = new self($element);
+            $source  = new self($element);
         }
 
         $source->set($track, $value);
 
         return $this;
+    }
+
+    public function has(string $path): bool
+    {
+        $pathTracks = explode($this->separator, $path);
+        $track      = array_shift($pathTracks);
+
+        if (!$this->proxy->has($track)) {
+            return false;
+        }
+
+        $value = $this->proxy->get($track);
+
+        if (!count($pathTracks)) {
+            return true;
+        }
+
+        if (
+            !is_array($value)
+            && !is_object($value)
+        ) {
+            return false;
+        }
+
+        $next = new self($value);
+
+        return $next->has(implode($this->separator, $pathTracks));
     }
 
     public function getReflectionType(string $path): ReflectionType|null

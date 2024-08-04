@@ -155,7 +155,7 @@ class ClassProxyTest extends TestCase
         };
 
         $this->expectException(InvalidPathException::class);
-        $this->expectExceptionMessage('Key \'property\' not found');
+        $this->expectExceptionMessage('Key `property` not found');
 
         $proxy = new ClassProxy($element);
         $proxy->get('property');
@@ -182,7 +182,7 @@ class ClassProxyTest extends TestCase
         };
 
         $this->expectException(InvalidPathException::class);
-        $this->expectExceptionMessage('Key \'property\' not found');
+        $this->expectExceptionMessage('Key `property` not found');
 
         $proxy = new ClassProxy($element);
         $proxy->set('property', 'bar');
@@ -236,7 +236,7 @@ class ClassProxyTest extends TestCase
         };
 
         $this->expectException(InvalidPathException::class);
-        $this->expectExceptionMessage('Key \'property\' not found');
+        $this->expectExceptionMessage('Key `property` not found');
 
         $proxy = new ClassProxy($element);
         $proxy->getReflectionType('property');

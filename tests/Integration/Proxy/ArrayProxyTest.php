@@ -148,7 +148,7 @@ class ArrayProxyTest extends TestCase
     {
         $element = [];
 
-        $this->expectExceptionMessage('Key \'foo\' not found');
+        $this->expectExceptionMessage('Key `foo` not found');
         $this->expectException(InvalidPathException::class);
 
         $wrapper = new ArrayProxy($element);
@@ -173,7 +173,7 @@ class ArrayProxyTest extends TestCase
     {
         $element = [];
 
-        $this->expectExceptionMessage('Key \'foo\' not found');
+        $this->expectExceptionMessage('Key `foo` not found');
         $this->expectException(InvalidPathException::class);
 
         $wrapper = new ArrayProxy($element);
@@ -200,7 +200,7 @@ class ArrayProxyTest extends TestCase
     {
         $element = [];
 
-        $this->expectExceptionMessage('Key \'foo\' not found');
+        $this->expectExceptionMessage('Key `foo` not found');
         $this->expectException(InvalidPathException::class);
 
         $proxy = new ArrayProxy($element);
