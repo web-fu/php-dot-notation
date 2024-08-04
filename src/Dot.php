@@ -47,6 +47,8 @@ final class Dot
             return $value;
         }
 
+        assert(is_array($value) || is_object($value));
+
         $next = new self($value);
 
         return $next->get(implode($this->separator, $pathTracks));
@@ -65,7 +67,10 @@ final class Dot
 
         if (count($pathTracks)) {
             $element = $this->get(implode($this->separator, $pathTracks));
-            $source  = new self($element);
+
+            assert(is_array($element) || is_object($element));
+
+            $source = new self($element);
         }
 
         $source->set($track, $value);
