@@ -107,22 +107,6 @@ final class Dot
     }
 
     /**
-     * @deprecated to be removed in the next major version
-     */
-    public static function isValidPath(string $path, string $separator = '.'): bool
-    {
-        if ('' === $path) {
-            return true;
-        }
-
-        $separatorEscaped = preg_quote($separator);
-
-        preg_match('/(([a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*(\(\))?)|([-+]?\d+))('.$separatorEscaped.'(([a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*(\(\))?)|([-+]?\d+)))*/', $path, $matches);
-
-        return count($matches) && $matches[0] === $path;
-    }
-
-    /**
      * @param mixed[]|object   $element
      * @param non-empty-string $separator
      *

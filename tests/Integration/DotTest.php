@@ -246,59 +246,6 @@ class DotTest extends TestCase
     }
 
     /**
-     * @covers ::isValidPath
-     *
-     * @dataProvider pathProvider
-     */
-    public function testIsValidPath(string $path): void
-    {
-        $this->assertTrue(Dot::isValidPath($path));
-    }
-
-    /**
-     * @return iterable<string[]>
-     */
-    public function pathProvider(): iterable
-    {
-        yield 'empty' => [''];
-        yield 'numeric_index_path' => ['0'];
-        yield 'literal_index_path' => ['foo'];
-        yield 'unicode_path' => ['🦄'];
-        yield 'method_path' => ['foo()'];
-        yield 'numeric.numeric' => ['0.0'];
-        yield 'numeric.literal' => ['0.bar'];
-        yield 'numeric.method' => ['0.bar()'];
-        yield 'literal.numeric' => ['foo.0'];
-        yield 'literal.literal' => ['foo.bar'];
-        yield 'literal.method' => ['foo.bar()'];
-        yield 'method.numeric' => ['foo().0'];
-        yield 'method.literal' => ['foo().bar'];
-        yield 'method.method' => ['foo().bar()'];
-    }
-
-    /**
-     * @covers ::isValidPath
-     *
-     * @dataProvider invalidPathProvider
-     */
-    public function testIsValidPathIsFalse(string $wrongPath): void
-    {
-        $this->assertFalse(Dot::isValidPath($wrongPath));
-    }
-
-    /**
-     * @return iterable<string[]>
-     */
-    public function invalidPathProvider(): iterable
-    {
-        yield 'starting_with_number' => ['0abc'];
-        yield 'illegal_character' => ['\$abc'];
-        yield 'unclosed_parenthesis' => ['abc('];
-        yield 'ending_with_dot' => ['abc.'];
-        yield 'chars_inside_parenthesis' => ['abc(a)'];
-    }
-
-    /**
      * @covers ::get
      *
      * @dataProvider missingChildPathProvider
