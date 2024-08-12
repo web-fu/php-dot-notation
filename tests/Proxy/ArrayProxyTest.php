@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace WebFu\DotNotation\Tests\Integration\Proxy;
+namespace WebFu\DotNotation\Tests\Proxy;
 
 use PHPUnit\Framework\TestCase;
 use WebFu\DotNotation\Exception\InvalidPathException;
@@ -20,6 +20,8 @@ use WebFu\Reflection\ReflectionType;
 
 /**
  * @coversDefaultClass \WebFu\DotNotation\Proxy\ArrayProxy
+ *
+ * @group unit
  */
 class ArrayProxyTest extends TestCase
 {

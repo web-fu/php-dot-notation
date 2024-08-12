@@ -11,17 +11,19 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace WebFu\DotNotation\Tests\Integration\Proxy;
+namespace WebFu\DotNotation\Tests\Proxy;
 
 use PHPUnit\Framework\TestCase;
 use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\DotNotation\Proxy\ClassProxy;
-use WebFu\DotNotation\Tests\Fixtures\ChildClass;
+use WebFu\DotNotation\Tests\TestData\ChildClass;
 use WebFu\Reflection\ReflectionType;
 
 /**
  * @coversDefaultClass \WebFu\DotNotation\Proxy\ClassProxy
+ *
+ * @group unit
  */
 class ClassProxyTest extends TestCase
 {

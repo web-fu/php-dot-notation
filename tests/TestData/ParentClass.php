@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace WebFu\DotNotation\Tests\Fixtures;
+namespace WebFu\DotNotation\Tests\TestData;
 
 class ParentClass
 {

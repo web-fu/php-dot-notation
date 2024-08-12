@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace WebFu\DotNotation\Tests\Integration;
+namespace WebFu\DotNotation\Tests;
 
 use PHPUnit\Framework\TestCase;
 use stdClass;
@@ -21,6 +21,8 @@ use WebFu\Reflection\ReflectionType;
 
 /**
  * @coversDefaultClass \WebFu\DotNotation\Dot
+ *
+ * @group integration
  */
 class DotTest extends TestCase
 {
