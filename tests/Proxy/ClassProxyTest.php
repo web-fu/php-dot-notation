@@ -18,6 +18,7 @@ use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\DotNotation\Proxy\ClassProxy;
 use WebFu\DotNotation\Tests\TestData\ChildClass;
+use WebFu\DotNotation\Tests\TestData\SimpleClass;
 use WebFu\Reflection\ReflectionType;
 
 /**
@@ -44,20 +45,20 @@ class ClassProxyTest extends TestCase
     public function hasDataProvider(): iterable
     {
         yield 'class.property.exists' => [
-            'element' => new class() {
+            'element' => new class {
                 public string $property;
             },
             'key'      => 'property',
             'expected' => true,
         ];
         yield 'class.property.not-exists' => [
-            'element' => new class() {
+            'element' => new class {
             },
             'key'      => 'property',
             'expected' => false,
         ];
         yield 'class.property.is-not-visible' => [
-            'element' => new class() {
+            'element' => new class {
                 /**
                  * @phpstan-ignore-next-line
                  */
@@ -67,7 +68,7 @@ class ClassProxyTest extends TestCase
             'expected' => false,
         ];
         yield 'class.method.exists' => [
-            'element' => new class() {
+            'element' => new class {
                 public function method(): void
                 {
                 }
@@ -76,13 +77,13 @@ class ClassProxyTest extends TestCase
             'expected' => true,
         ];
         yield 'class.method.not-exists' => [
-            'element' => new class() {
+            'element' => new class {
             },
             'key'      => 'method()',
             'expected' => false,
         ];
         yield 'class.method.is-not-visible' => [
-            'element' => new class() {
+            'element' => new class {
                 /**
                  * @phpstan-ignore-next-line
                  */
@@ -130,14 +131,14 @@ class ClassProxyTest extends TestCase
     public function getDataProvider(): iterable
     {
         yield 'class.property' => [
-            'element' => new class() {
+            'element' => new class {
                 public string $property = 'foo';
             },
             'key'      => 'property',
             'expected' => 'foo',
         ];
         yield 'class.method' => [
-            'element' => new class() {
+            'element' => new class {
                 public function method(): string
                 {
                     return 'foo';
@@ -153,7 +154,7 @@ class ClassProxyTest extends TestCase
      */
     public function testGetFailIfKeyDoNotExists(): void
     {
-        $element = new class() {
+        $element = new class {
         };
 
         $this->expectException(InvalidPathException::class);
@@ -168,7 +169,7 @@ class ClassProxyTest extends TestCase
      */
     public function testSet(): void
     {
-        $element = new class() {
+        $element = new class {
             public string $property = 'foo';
         };
 
@@ -180,7 +181,7 @@ class ClassProxyTest extends TestCase
 
     public function testSetFailIfKeyDoNotExists(): void
     {
-        $element = new class() {
+        $element = new class {
         };
 
         $this->expectException(InvalidPathException::class);
@@ -190,12 +191,57 @@ class ClassProxyTest extends TestCase
         $proxy->set('property', 'bar');
     }
 
+    public function testIsInitialised(): void
+    {
+        $element = new class {
+            public string|null $foo;
+        };
+
+        $proxy = new ClassProxy($element);
+
+        $this->assertFalse($proxy->isInitialised('foo'));
+
+        $element->foo = 'bar';
+
+        $this->assertTrue($proxy->isInitialised('foo'));
+    }
+
+    public function testInit(): void
+    {
+        $element = new class {
+            public SimpleClass $property;
+            public array $array;
+        };
+
+        $proxy = new ClassProxy($element);
+        $proxy->init('property');
+
+        $this->assertInstanceOf(SimpleClass::class, $element->property);
+
+        $proxy->init('array');
+        $this->assertSame([], $element->array);
+    }
+
+    public function testInitFailIfScalarProperty(): void
+    {
+        $element = new class {
+            public string $string;
+        };
+
+        $proxy = new ClassProxy($element);
+
+        $this->expectException(UnsupportedOperationException::class);
+        $this->expectExceptionMessage('Cannot init type `string`');
+
+        $proxy->init('string');
+    }
+
     /**
      * @covers ::set
      */
     public function testSetFailIfKeyIsMethod(): void
     {
-        $element = new class() {
+        $element = new class {
             public function method(): void
             {
             }
@@ -213,7 +259,7 @@ class ClassProxyTest extends TestCase
      */
     public function testGetReflectionType(): void
     {
-        $element = new class() {
+        $element = new class {
             public string $property = 'foo';
 
             public function method(): string
@@ -234,7 +280,7 @@ class ClassProxyTest extends TestCase
      */
     public function testGetReflectionTypeFailIfKeyDoNotExists(): void
     {
-        $element = new class() {
+        $element = new class {
         };
 
         $this->expectException(InvalidPathException::class);

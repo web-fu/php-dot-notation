@@ -16,6 +16,7 @@ namespace WebFu\DotNotation\Tests\Proxy;
 use PHPUnit\Framework\TestCase;
 use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Proxy\ArrayProxy;
+use WebFu\DotNotation\Tests\TestData\SimpleClass;
 use WebFu\Reflection\ReflectionType;
 
 /**
@@ -180,6 +181,34 @@ class ArrayProxyTest extends TestCase
 
         $wrapper = new ArrayProxy($element);
         $wrapper->set('foo', 2);
+    }
+
+    public function testIsInitialised(): void
+    {
+        $element = [
+            'foo' => null,
+        ];
+
+        $proxy = new ArrayProxy($element);
+        $this->assertFalse($proxy->isInitialised('foo'));
+
+        $element['foo'] = new SimpleClass();
+
+        $this->assertTrue($proxy->isInitialised('foo'));
+    }
+
+    /**
+     * @covers ::init
+     */
+    public function testInit(): void
+    {
+        $element = [
+            'foo' => null,
+        ];
+
+        $proxy = new ArrayProxy($element);
+        $proxy->init('foo', SimpleClass::class);
+        $this->assertInstanceOf(SimpleClass::class, $element['foo']);
     }
 
     /**

@@ -40,6 +40,11 @@ class ClassProxy implements ProxyInterface
         }
     }
 
+    public function getElement(): object
+    {
+        return $this->element;
+    }
+
     public function has(int|string $key): bool
     {
         return array_key_exists($key, $this->keys);
@@ -85,6 +90,87 @@ class ClassProxy implements ProxyInterface
         $this->element->{$key} = $value;
 
         return $this;
+    }
+
+    public function isInitialised(string|int $key): bool
+    {
+        if (!$this->has($key)) {
+            throw new InvalidPathException('Key `'.$key.'` not found');
+        }
+
+        $key = (string) $key;
+
+        $reflection = new ReflectionClass($this->element);
+
+        if (str_ends_with($key, '()')) {
+            $method = str_replace('()', '', $key);
+
+            return $reflection->hasMethod($method);
+        }
+
+        return $reflection->getProperty($key)->isInitialized($this->element);
+    }
+
+    public function init(int|string $key, string|null $type = null): ProxyInterface
+    {
+        if (!$this->has($key)) {
+            throw new InvalidPathException('Key `'.$key.'` not found');
+        }
+
+        $key = (string) $key;
+
+        if (str_ends_with($key, '()')) {
+            throw new UnsupportedOperationException('Cannot init a class method');
+        }
+
+        if ($this->isInitialised($key)) {
+            return $this;
+        }
+
+        $reflectionType = $this->getReflectionType($key);
+
+        if (
+            count($reflectionType->getTypeNames()) > 1
+            && null === $type
+        ) {
+            throw new UnsupportedOperationException('In case of union type you must specify the type');
+        }
+
+        $type ??= $reflectionType->getTypeNames()[0];
+
+        if (
+            'array' !== $type
+            && !class_exists($type)
+        ) {
+            throw new UnsupportedOperationException('Cannot init type `'.$type.'`');
+        }
+
+        if (class_exists($type)) {
+            $this->element->{$key} = new $type();
+
+            return $this;
+        }
+
+        assert('array' === $type);
+
+        $this->element->{$key} = [];
+
+        return $this;
+    }
+
+    public function getReflection(string|int $key): ReflectionProperty|ReflectionMethod
+    {
+        $key = (string) $key;
+
+        $reflection = new ReflectionClass($this->element);
+
+        if (str_ends_with($key, '()')) {
+            $method = str_replace('()', '', $key);
+
+            return $reflection->getMethod($method);
+        }
+
+        return $reflection->getProperty($key);
     }
 
     public function getReflectionType(int|string $key): ReflectionType|null
