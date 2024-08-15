@@ -29,7 +29,7 @@ echo $dot->get('foo.bar').PHP_EOL; // test
 $dot->set('foo.bar', 'baz');
 echo $array['foo']['bar'].PHP_EOL; // baz
 
-$class = new class() {
+$class = new class {
     public string $property = 'test';
 
     public function method(): string
