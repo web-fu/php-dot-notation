@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace WebFu\DotNotation;
 
-use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Proxy\ProxyFactory;
 use WebFu\DotNotation\Proxy\ProxyInterface;
@@ -56,26 +55,29 @@ final class Dot
 
     public function set(string $path, mixed $value): self
     {
-        if (!$this->has($path)) {
-            throw new PathNotFoundException('Path `'.$path.'` not found');
-        }
-
         $pathTracks = explode($this->separator, $path);
-        $track      = array_pop($pathTracks);
 
-        $source = $this->proxy;
+        if (1 === count($pathTracks)) {
+            $this->proxy->set($pathTracks[0], $value);
 
-        if (count($pathTracks)) {
-            $element = $this->get(implode($this->separator, $pathTracks));
-
-            assert(is_array($element) || is_object($element));
-
-            $source = new self($element);
+            return $this;
         }
 
-        $source->set($track, $value);
+        $track = array_shift($pathTracks);
 
-        return $this;
+        if (!$this->proxy->isInitialised($track)) {
+            $this->proxy->init($track);
+        }
+
+        $newElement = $this->proxy->get($track);
+
+        assert(is_array($newElement) || is_object($newElement));
+
+        $next = new self($newElement);
+
+        $newPath = implode($this->separator, $pathTracks);
+
+        return $next->set($newPath, $value);
     }
 
     public function has(string $path): bool
@@ -119,7 +121,7 @@ final class Dot
                 && !is_object($element)
             ) {
                 $type = get_debug_type($element);
-                throw new InvalidPathException('Element of type '.$type.' has no child element');
+                throw new PathNotFoundException('Element of type '.$type.' has no child element');
             }
             $source = new self($element);
         }
