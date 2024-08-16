@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace WebFu\DotNotation\Proxy;
 
-use WebFu\DotNotation\Exception\InvalidPathException;
+use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\Reflection\ReflectionClass;
 use WebFu\Reflection\ReflectionMethod;
@@ -61,7 +61,7 @@ class ClassProxy implements ProxyInterface
     public function get(int|string $key): mixed
     {
         if (!$this->has($key)) {
-            throw new InvalidPathException('Key `'.$key.'` not found');
+            throw new PathNotFoundException('Key `'.$key.'` not found');
         }
 
         $key = (string) $key;
@@ -78,7 +78,7 @@ class ClassProxy implements ProxyInterface
     public function set(int|string $key, mixed $value): ProxyInterface
     {
         if (!$this->has($key)) {
-            throw new InvalidPathException('Key `'.$key.'` not found');
+            throw new PathNotFoundException('Key `'.$key.'` not found');
         }
 
         $key = (string) $key;
@@ -95,7 +95,7 @@ class ClassProxy implements ProxyInterface
     public function isInitialised(string|int $key): bool
     {
         if (!$this->has($key)) {
-            throw new InvalidPathException('Key `'.$key.'` not found');
+            throw new PathNotFoundException('Key `'.$key.'` not found');
         }
 
         $key = (string) $key;
@@ -114,7 +114,7 @@ class ClassProxy implements ProxyInterface
     public function init(int|string $key, string|null $type = null): ProxyInterface
     {
         if (!$this->has($key)) {
-            throw new InvalidPathException('Key `'.$key.'` not found');
+            throw new PathNotFoundException('Key `'.$key.'` not found');
         }
 
         $key = (string) $key;
@@ -176,7 +176,7 @@ class ClassProxy implements ProxyInterface
     public function getReflectionType(int|string $key): ReflectionType|null
     {
         if (!$this->has($key)) {
-            throw new InvalidPathException('Key `'.$key.'` not found');
+            throw new PathNotFoundException('Key `'.$key.'` not found');
         }
 
         $key = (string) $key;

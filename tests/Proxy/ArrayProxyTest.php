@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace WebFu\DotNotation\Tests\Proxy;
 
 use PHPUnit\Framework\TestCase;
-use WebFu\DotNotation\Exception\InvalidPathException;
+use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Proxy\ArrayProxy;
 use WebFu\DotNotation\Tests\TestData\SimpleClass;
 use WebFu\Reflection\ReflectionType;
@@ -152,7 +152,7 @@ class ArrayProxyTest extends TestCase
         $element = [];
 
         $this->expectExceptionMessage('Key `foo` not found');
-        $this->expectException(InvalidPathException::class);
+        $this->expectException(PathNotFoundException::class);
 
         $wrapper = new ArrayProxy($element);
         $wrapper->get('foo');
@@ -177,7 +177,7 @@ class ArrayProxyTest extends TestCase
         $element = [];
 
         $this->expectExceptionMessage('Key `foo` not found');
-        $this->expectException(InvalidPathException::class);
+        $this->expectException(PathNotFoundException::class);
 
         $wrapper = new ArrayProxy($element);
         $wrapper->set('foo', 2);
@@ -232,7 +232,7 @@ class ArrayProxyTest extends TestCase
         $element = [];
 
         $this->expectExceptionMessage('Key `foo` not found');
-        $this->expectException(InvalidPathException::class);
+        $this->expectException(PathNotFoundException::class);
 
         $proxy = new ArrayProxy($element);
         $proxy->getReflectionType('foo');

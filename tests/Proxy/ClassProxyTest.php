@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace WebFu\DotNotation\Tests\Proxy;
 
 use PHPUnit\Framework\TestCase;
-use WebFu\DotNotation\Exception\InvalidPathException;
+use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\DotNotation\Proxy\ClassProxy;
 use WebFu\DotNotation\Tests\TestData\ChildClass;
@@ -157,7 +157,7 @@ class ClassProxyTest extends TestCase
         $element = new class {
         };
 
-        $this->expectException(InvalidPathException::class);
+        $this->expectException(PathNotFoundException::class);
         $this->expectExceptionMessage('Key `property` not found');
 
         $proxy = new ClassProxy($element);
@@ -184,7 +184,7 @@ class ClassProxyTest extends TestCase
         $element = new class {
         };
 
-        $this->expectException(InvalidPathException::class);
+        $this->expectException(PathNotFoundException::class);
         $this->expectExceptionMessage('Key `property` not found');
 
         $proxy = new ClassProxy($element);
@@ -283,7 +283,7 @@ class ClassProxyTest extends TestCase
         $element = new class {
         };
 
-        $this->expectException(InvalidPathException::class);
+        $this->expectException(PathNotFoundException::class);
         $this->expectExceptionMessage('Key `property` not found');
 
         $proxy = new ClassProxy($element);

@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace WebFu\DotNotation\Proxy;
 
-use WebFu\DotNotation\Exception\InvalidPathException;
+use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\Reflection\ReflectionType;
 
@@ -47,7 +47,7 @@ class ArrayProxy implements ProxyInterface
     public function get(int|string $key): mixed
     {
         if (!$this->has($key)) {
-            throw new InvalidPathException('Key `'.$key.'` not found');
+            throw new PathNotFoundException('Key `'.$key.'` not found');
         }
 
         return $this->element[$key];
@@ -56,7 +56,7 @@ class ArrayProxy implements ProxyInterface
     public function set(int|string $key, mixed $value): self
     {
         if (!$this->has($key)) {
-            throw new InvalidPathException('Key `'.$key.'` not found');
+            throw new PathNotFoundException('Key `'.$key.'` not found');
         }
 
         $this->element[$key] = $value;
@@ -98,7 +98,7 @@ class ArrayProxy implements ProxyInterface
     public function getReflectionType(int|string $key): ReflectionType|null
     {
         if (!$this->has($key)) {
-            throw new InvalidPathException('Key `'.$key.'` not found');
+            throw new PathNotFoundException('Key `'.$key.'` not found');
         }
 
         $value = $this->element[$key];
