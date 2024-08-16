@@ -17,6 +17,7 @@ use PHPUnit\Framework\TestCase;
 use stdClass;
 use WebFu\DotNotation\Dot;
 use WebFu\DotNotation\Exception\PathNotFoundException;
+use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
 use WebFu\Reflection\ReflectionType;
 
 /**
@@ -45,14 +46,14 @@ class DotTest extends TestCase
     public function getDataProvider(): iterable
     {
         yield 'class.scalar' => [
-            'element' => new class() {
+            'element' => new class {
                 public string $scalar = 'scalar';
             },
             'path'     => 'scalar',
             'expected' => 'scalar',
         ];
         yield 'class.array' => [
-            'element' => new class() {
+            'element' => new class {
                 /**
                  * @var int[]
                  */
@@ -62,7 +63,7 @@ class DotTest extends TestCase
             'expected' => [0, 1, 2],
         ];
         yield 'class.class' => [
-            'element' => new class() {
+            'element' => new class {
                 public object $object;
 
                 public function __construct()
@@ -75,7 +76,7 @@ class DotTest extends TestCase
             'expected' => (object) ['test' => 'test'],
         ];
         yield 'class.method' => [
-            'element' => new class() {
+            'element' => new class {
                 public function method(): int
                 {
                     return 1;
@@ -85,7 +86,7 @@ class DotTest extends TestCase
             'expected' => 1,
         ];
         yield 'class.array.property' => [
-            'element' => new class() {
+            'element' => new class {
                 /**
                  * @var object[]
                  */
@@ -94,7 +95,7 @@ class DotTest extends TestCase
                 public function __construct()
                 {
                     $this->objectList = [
-                        new class() {
+                        new class {
                             public string $string = 'test';
                         },
                     ];
@@ -121,7 +122,7 @@ class DotTest extends TestCase
         yield 'array.class.property' => [
             'element' => [
                 'objectList' => [
-                    new class() {
+                    new class {
                         public string $string = 'test';
                     },
                 ]],
@@ -213,14 +214,14 @@ class DotTest extends TestCase
     public function setDataProvider(): iterable
     {
         yield 'class.scalar' => [
-            'element' => new class() {
+            'element' => new class {
                 public string $scalar = 'scalar';
             },
             'path'     => 'scalar',
             'expected' => 'new',
         ];
         yield 'class.array' => [
-            'element' => new class() {
+            'element' => new class {
                 /**
                  * @var int[]
                  */
@@ -230,7 +231,7 @@ class DotTest extends TestCase
             'expected' => [3, 4, 5],
         ];
         yield 'class.class' => [
-            'element' => new class() {
+            'element' => new class {
                 public object $object;
 
                 public function __construct()
@@ -241,25 +242,6 @@ class DotTest extends TestCase
             },
             'path'     => 'object',
             'expected' => (object) ['new' => 'new'],
-        ];
-        yield 'class.array.property' => [
-            'element' => new class() {
-                /**
-                 * @var object[]
-                 */
-                public array $objectList;
-
-                public function __construct()
-                {
-                    $this->objectList = [
-                        new class() {
-                            public string $string = 'test';
-                        },
-                    ];
-                }
-            },
-            'path'     => 'objectList.0.string',
-            'expected' => 'new',
         ];
         yield 'array.scalar' => [
             'element'  => ['scalar' => 'scalar'],
@@ -276,16 +258,43 @@ class DotTest extends TestCase
             'path'     => 'object',
             'expected' => (object) ['new' => 'new'],
         ];
-        yield 'array.class.property' => [
-            'element' => [
-                'objectList' => [
-                    new class() {
+    }
+
+    /**
+     * @covers ::set
+     */
+    public function testSetExtraCases(): void
+    {
+        // class -> array -> class -> scalar
+        $element = new class {
+            /**
+             * @var object[]
+             */
+            public array $objectList;
+
+            public function __construct()
+            {
+                $this->objectList = [
+                    new class {
                         public string $string = 'test';
                     },
-                ]],
-            'path'     => 'objectList.0.string',
-            'expected' => 'new',
-        ];
+                ];
+            }
+        };
+
+        $dot = new Dot($element);
+        $dot->set('objectList.0.string', 'test2');
+
+        /* @phpstan-ignore-next-line */
+        $this->assertEquals('test2', $element->objectList[0]->string);
+
+        // class -> class -> scalar
+        $element = new ClassWithComplexProperties();
+
+        $dot = new Dot($element);
+        $dot->set('simple.public', 'new');
+
+        $this->assertEquals('new', $element->simple->public);
     }
 
     /**
@@ -308,21 +317,21 @@ class DotTest extends TestCase
     public function hasDataProvider(): iterable
     {
         yield 'class.scalar.exists' => [
-            'element' => new class() {
+            'element' => new class {
                 public string $scalar = 'scalar';
             },
             'path'     => 'scalar',
             'expected' => true,
         ];
         yield 'class.scalar.not-exists' => [
-            'element' => new class() {
+            'element' => new class {
                 public string $scalar = 'scalar';
             },
             'path'     => 'notExists',
             'expected' => false,
         ];
         yield 'class.array.exists' => [
-            'element' => new class() {
+            'element' => new class {
                 /**
                  * @var int[]
                  */
@@ -332,7 +341,7 @@ class DotTest extends TestCase
             'expected' => true,
         ];
         yield 'class.array.not-exists' => [
-            'element' => new class() {
+            'element' => new class {
                 /**
                  * @var int[]
                  */
@@ -342,7 +351,7 @@ class DotTest extends TestCase
             'expected' => false,
         ];
         yield 'class.class.exists' => [
-            'element' => new class() {
+            'element' => new class {
                 public object $object;
 
                 public function __construct()
@@ -355,7 +364,7 @@ class DotTest extends TestCase
             'expected' => true,
         ];
         yield 'class.class.not-exists' => [
-            'element' => new class() {
+            'element' => new class {
                 public object $object;
 
                 public function __construct()
@@ -368,7 +377,7 @@ class DotTest extends TestCase
             'expected' => false,
         ];
         yield 'class.method.exists' => [
-            'element' => new class() {
+            'element' => new class {
                 public function method(): void
                 {
                 }
@@ -377,7 +386,7 @@ class DotTest extends TestCase
             'expected' => true,
         ];
         yield 'class.method.not-exists' => [
-            'element' => new class() {
+            'element' => new class {
                 public function method(): void
                 {
                 }
@@ -386,7 +395,7 @@ class DotTest extends TestCase
             'expected' => false,
         ];
         yield 'class.array.property.exists' => [
-            'element' => new class() {
+            'element' => new class {
                 /**
                  * @var object[]
                  */
@@ -395,7 +404,7 @@ class DotTest extends TestCase
                 public function __construct()
                 {
                     $this->objectList = [
-                        new class() {
+                        new class {
                             public string $string = 'test';
                         },
                     ];
@@ -405,7 +414,7 @@ class DotTest extends TestCase
             'expected' => true,
         ];
         yield 'class.array.property.not-exists' => [
-            'element' => new class() {
+            'element' => new class {
                 /**
                  * @var object[]
                  */
@@ -414,7 +423,7 @@ class DotTest extends TestCase
                 public function __construct()
                 {
                     $this->objectList = [
-                        new class() {
+                        new class {
                             public string $string = 'test';
                         },
                     ];
@@ -456,7 +465,7 @@ class DotTest extends TestCase
         yield 'array.class.property.exists' => [
             'element' => [
                 'objectList' => [
-                    new class() {
+                    new class {
                         public string $string = 'test';
                     },
                 ]],
@@ -466,7 +475,7 @@ class DotTest extends TestCase
         yield 'array.class.property.not-exists' => [
             'element' => [
                 'objectList' => [
-                    new class() {
+                    new class {
                         public string $string = 'test';
                     },
                 ]],

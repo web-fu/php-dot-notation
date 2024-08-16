@@ -25,11 +25,6 @@ class ArrayProxy implements ProxyInterface
     {
     }
 
-    public function getElement(): array
-    {
-        return $this->element;
-    }
-
     public function has(int|string $key): bool
     {
         return array_key_exists($key, $this->element);

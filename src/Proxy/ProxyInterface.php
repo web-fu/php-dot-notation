@@ -17,8 +17,6 @@ use WebFu\Reflection\ReflectionType;
 
 interface ProxyInterface
 {
-    public function getElement(): array|object;
-
     public function has(int|string $key): bool;
 
     /**

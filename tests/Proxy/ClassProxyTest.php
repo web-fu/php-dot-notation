@@ -210,6 +210,9 @@ class ClassProxyTest extends TestCase
     {
         $element = new class {
             public SimpleClass $property;
+            /**
+             * @var mixed[]
+             */
             public array $array;
         };
 

@@ -40,11 +40,6 @@ class ClassProxy implements ProxyInterface
         }
     }
 
-    public function getElement(): object
-    {
-        return $this->element;
-    }
-
     public function has(int|string $key): bool
     {
         return array_key_exists($key, $this->keys);
@@ -108,7 +103,10 @@ class ClassProxy implements ProxyInterface
             return $reflection->hasMethod($method);
         }
 
-        return $reflection->getProperty($key)->isInitialized($this->element);
+        /** @var ReflectionProperty $property */
+        $property = $reflection->getProperty($key);
+
+        return $property->isInitialized($this->element);
     }
 
     public function init(int|string $key, string|null $type = null): ProxyInterface
@@ -127,6 +125,7 @@ class ClassProxy implements ProxyInterface
             return $this;
         }
 
+        /** @var ReflectionType $reflectionType */
         $reflectionType = $this->getReflectionType($key);
 
         if (
@@ -141,21 +140,6 @@ class ClassProxy implements ProxyInterface
         $this->element->{$key} = ValueInitializer::init($type);
 
         return $this;
-    }
-
-    public function getReflection(string|int $key): ReflectionProperty|ReflectionMethod
-    {
-        $key = (string) $key;
-
-        $reflection = new ReflectionClass($this->element);
-
-        if (str_ends_with($key, '()')) {
-            $method = str_replace('()', '', $key);
-
-            return $reflection->getMethod($method);
-        }
-
-        return $reflection->getProperty($key);
     }
 
     public function getReflectionType(int|string $key): ReflectionType|null
