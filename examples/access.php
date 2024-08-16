@@ -46,3 +46,26 @@ echo $dot->get('method()').PHP_EOL; // foo
 // Setting a value in an object
 $dot->set('property', 'baz');
 echo $class->property.PHP_EOL; // baz
+
+// Accessing a value in object in an array in a object
+$test = new class {
+    /**
+     * @var object[]
+     */
+    public array $objectList;
+
+    public function __construct()
+    {
+        $this->objectList = [
+            new class {
+                public string $string = 'test';
+            },
+        ];
+    }
+};
+
+$dot = new Dot($test);
+echo $dot->get('objectList.0.string'); // test
+
+$dot->set('objectList.0.string', 'test2');
+echo $test->objectList[0]->string.PHP_EOL; // test2
