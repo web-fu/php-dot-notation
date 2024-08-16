@@ -209,6 +209,12 @@ class ArrayProxyTest extends TestCase
         $proxy = new ArrayProxy($element);
         $proxy->init('foo', SimpleClass::class);
         $this->assertInstanceOf(SimpleClass::class, $element['foo']);
+
+        $element = [];
+
+        $proxy = new ArrayProxy($element);
+        $proxy->init('foo');
+        $this->assertNull($element['foo']);
     }
 
     /**

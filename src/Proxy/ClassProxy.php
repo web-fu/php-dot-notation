@@ -138,22 +138,7 @@ class ClassProxy implements ProxyInterface
 
         $type ??= $reflectionType->getTypeNames()[0];
 
-        if (
-            'array' !== $type
-            && !class_exists($type)
-        ) {
-            throw new UnsupportedOperationException('Cannot init type `'.$type.'`');
-        }
-
-        if (class_exists($type)) {
-            $this->element->{$key} = new $type();
-
-            return $this;
-        }
-
-        assert('array' === $type);
-
-        $this->element->{$key} = [];
+        $this->element->{$key} = ValueInitializer::init($type);
 
         return $this;
     }

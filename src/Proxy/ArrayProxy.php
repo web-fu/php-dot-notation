@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace WebFu\DotNotation\Proxy;
 
 use WebFu\DotNotation\Exception\PathNotFoundException;
-use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\Reflection\ReflectionType;
 
 class ArrayProxy implements ProxyInterface
@@ -75,22 +74,7 @@ class ArrayProxy implements ProxyInterface
             return $this;
         }
 
-        if (
-            'array' !== $type
-            && !class_exists($type)
-        ) {
-            throw new UnsupportedOperationException('Cannot init type `'.$type.'`');
-        }
-
-        if (class_exists($type)) {
-            $this->element[$key] = new $type();
-
-            return $this;
-        }
-
-        assert('array' === $type);
-
-        $this->element[$key] = null;
+        $this->element[$key] = ValueInitializer::init($type);
 
         return $this;
     }
