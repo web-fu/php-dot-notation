@@ -74,6 +74,17 @@ class ArrayProxy implements ProxyInterface
         return $this;
     }
 
+    public function unset(int|string $key): self
+    {
+        if (!$this->has($key)) {
+            throw new PathNotFoundException('Key `'.$key.'` not found');
+        }
+
+        unset($this->element[$key]);
+
+        return $this;
+    }
+
     public function getReflectionType(int|string $key): ReflectionType|null
     {
         if (!$this->has($key)) {

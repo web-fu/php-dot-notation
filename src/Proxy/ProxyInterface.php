@@ -30,10 +30,9 @@ interface ProxyInterface
 
     public function isInitialised(string|int $key): bool;
 
-    /**
-     * @param class-string|null $type
-     */
     public function init(string|int $key, string|null $type = null): self;
+
+    public function unset(string|int $key): self;
 
     public function getReflectionType(string $key): ReflectionType|null;
 }
