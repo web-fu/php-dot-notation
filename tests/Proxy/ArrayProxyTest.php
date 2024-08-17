@@ -231,6 +231,16 @@ class ArrayProxyTest extends TestCase
         $this->assertArrayNotHasKey('foo', $element);
     }
 
+    public function testUnsetChangeNothingIfNothingToUnset(): void
+    {
+        $element = ['bar' => 'baz'];
+
+        $proxy = new ArrayProxy($element);
+        $proxy->unset('foo');
+
+        $this->assertEquals(['bar' => 'baz'], $element);
+    }
+
     /**
      * @covers ::getReflectionType
      */

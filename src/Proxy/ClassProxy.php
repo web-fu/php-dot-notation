@@ -145,7 +145,7 @@ class ClassProxy implements ProxyInterface
     public function unset(int|string $key): ProxyInterface
     {
         if (!$this->has($key)) {
-            throw new PathNotFoundException('Key `'.$key.'` not found');
+            return $this;
         }
 
         $key = (string) $key;

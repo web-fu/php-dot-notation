@@ -251,6 +251,18 @@ class ClassProxyTest extends TestCase
         $this->assertFalse(isset($element->property));
     }
 
+    public function testUnsetChangesNothingIfNothingToUnset(): void
+    {
+        $element = new SimpleClass();
+
+        $proxy = new ClassProxy($element);
+        $proxy->unset('propertyNotExists');
+
+        $expected = new SimpleClass();
+
+        $this->assertEquals($expected, $element);
+    }
+
     /**
      * @covers ::set
      */
