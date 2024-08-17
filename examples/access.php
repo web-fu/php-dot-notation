@@ -65,7 +65,7 @@ $test = new class {
 };
 
 $dot = new Dot($test);
-echo $dot->get('objectList.0.string'); // test
+echo $dot->get('objectList.0.string').PHP_EOL; // test
 
 $dot->set('objectList.0.string', 'test2');
 echo $test->objectList[0]->string.PHP_EOL; // test2
