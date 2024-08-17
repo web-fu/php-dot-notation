@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace WebFu\DotNotation;
 
+use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Proxy\ProxyFactory;
 use WebFu\DotNotation\Proxy\ProxyInterface;
@@ -99,7 +100,7 @@ final class Dot
             !is_array($value)
             && !is_object($value)
         ) {
-            return false;
+            throw new InvalidPathException('Element of type `'.get_debug_type($value).'` has no child elements');
         }
 
         $next = new self($value);
@@ -174,7 +175,7 @@ final class Dot
         $track = array_shift($pathTracks);
 
         if (!$this->proxy->isInitialised($track)) {
-            $this->proxy->init($track);
+            return $this;
         }
 
         $newElement = $this->proxy->get($track);
@@ -184,8 +185,11 @@ final class Dot
         $next = new self($newElement);
 
         $newPath = implode($this->separator, $pathTracks);
+        $next->unset($newPath);
 
-        return $next->unset($newPath);
+        $this->set($track, $newElement);
+
+        return $this;
     }
 
     public function getReflectionType(string $path): ReflectionType|null

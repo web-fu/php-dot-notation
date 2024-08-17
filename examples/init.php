@@ -34,9 +34,10 @@ $test = new class {
 };
 
 $dot = new Dot($test);
-$dot->init('array.foo');
+$dot->init('array');
 
-echo $test->array['foo'].PHP_EOL; // null
+var_dump($test->array); // []
+echo PHP_EOL;
 
 // Unsetting a value in an array or an object
 $test = new class {
