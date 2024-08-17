@@ -218,6 +218,20 @@ class ArrayProxyTest extends TestCase
     }
 
     /**
+     * @covers ::unset
+     */
+    public function testUnset(): void
+    {
+        $element = [
+            'foo' => 1,
+        ];
+
+        $proxy = new ArrayProxy($element);
+        $proxy->unset('foo');
+        $this->assertArrayNotHasKey('foo', $element);
+    }
+
+    /**
      * @covers ::getReflectionType
      */
     public function testGetReflectionType(): void

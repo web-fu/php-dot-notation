@@ -239,6 +239,18 @@ class ClassProxyTest extends TestCase
         $proxy->init('string');
     }
 
+    public function testUnset(): void
+    {
+        $element = new class {
+            public string $property = 'foo';
+        };
+
+        $proxy = new ClassProxy($element);
+        $proxy->unset('property');
+
+        $this->assertFalse(isset($element->property));
+    }
+
     /**
      * @covers ::set
      */

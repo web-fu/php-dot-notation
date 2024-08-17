@@ -18,6 +18,7 @@ use stdClass;
 use WebFu\DotNotation\Dot;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
+use WebFu\DotNotation\Tests\TestData\SimpleClass;
 use WebFu\Reflection\ReflectionType;
 
 /**
@@ -285,7 +286,6 @@ class DotTest extends TestCase
         $dot = new Dot($element);
         $dot->set('objectList.0.string', 'test2');
 
-        /* @phpstan-ignore-next-line */
         $this->assertEquals('test2', $element->objectList[0]->string);
 
         // class -> class -> scalar
@@ -482,6 +482,118 @@ class DotTest extends TestCase
             'path'     => 'objectList.0.notExists',
             'expected' => false,
         ];
+    }
+
+    /**
+     * @covers ::isInitialized
+     *
+     * @dataProvider initializedCaseProvider
+     *
+     * @param mixed[]|object $element
+     */
+    public function testIsInitialized(object|array $element, string $path, bool $expected): void
+    {
+        $dot = new Dot($element);
+        $this->assertEquals($expected, $dot->isInitialised($path));
+    }
+
+    /**
+     * @return iterable<array{element: mixed[]|object, path: string, expected: bool}>
+     */
+    public function initializedCaseProvider(): iterable
+    {
+        yield 'class.scalar' => [
+            'element' => new class {
+                public string $scalar = 'scalar';
+            },
+            'path'     => 'scalar',
+            'expected' => true,
+        ];
+        yield 'class.array' => [
+            'element' => new class {
+                /**
+                 * @var int[]
+                 */
+                public array $list = [0, 1, 2];
+            },
+            'path'     => 'list',
+            'expected' => true,
+        ];
+        yield 'class.class' => [
+            'element' => new class {
+                public object $object;
+
+                public function __construct()
+                {
+                    $this->object       = new stdClass();
+                    $this->object->test = 'test';
+                }
+            },
+            'path'     => 'object',
+            'expected' => true,
+        ];
+        yield 'class.method' => [
+            'element' => new class {
+                public function method(): void
+                {
+                }
+            },
+            'path'     => 'method()',
+            'expected' => true,
+        ];
+        yield 'class.array.property' => [
+            'element' => new class {
+                /**
+                 * @var object[]
+                 */
+                public array $objectList;
+
+                public function __construct()
+                {
+                    $this->objectList = [
+                        new class {
+                            public string $string = 'test';
+                        },
+                    ];
+                }
+            },
+            'path'     => 'objectList.0.string',
+            'expected' => true,
+        ];
+        yield 'array.scalar' => [
+            'element'  => ['scalar' => 'scalar'],
+            'path'     => 'scalar',
+            'expected' => true,
+        ];
+        yield 'array.array' => [
+            'element'  => ['list' => [0, 1, 2]],
+            'path'     => 'list',
+            'expected' => true,
+        ];
+        yield 'array.class' => [
+            'element'  => ['object' => (object) ['test' => 'test']],
+            'path'     => 'object',
+            'expected' => true,
+        ];
+    }
+
+    public function testInit(): void
+    {
+        $element = [new ClassWithComplexProperties()];
+
+        $dot = new Dot($element);
+        $dot->init('0.simple');
+
+        $this->assertInstanceOf(SimpleClass::class, $element[0]->simple);
+    }
+
+    public function testUnset(): void
+    {
+        $element = ['foo' => 1];
+        $dot     = new Dot($element);
+        $dot->unset('foo');
+
+        $this->assertArrayNotHasKey('foo', $element);
     }
 
     public function testGetReflectionType(): void
