@@ -6,5 +6,5 @@ parameters:
         - src
         - tests
     excludePaths:
-        - tests/Fixtures
+        - tests/TestData
     checkGenericClassInNonGenericObjectType: false

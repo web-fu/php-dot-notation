@@ -27,9 +27,9 @@ final class Dot
      * @param mixed[]|object   $element
      * @param non-empty-string $separator
      */
-    public function __construct(private array|object $element, private string $separator = '.')
+    public function __construct(array|object &$element, private string $separator = '.')
     {
-        $this->proxy = ProxyFactory::create($this->element);
+        $this->proxy = ProxyFactory::create($element);
     }
 
     public function get(string $path): mixed
@@ -56,26 +56,29 @@ final class Dot
 
     public function set(string $path, mixed $value): self
     {
-        if (!$this->has($path)) {
-            throw new PathNotFoundException('Path `'.$path.'` not found');
-        }
-
         $pathTracks = explode($this->separator, $path);
-        $track      = array_pop($pathTracks);
 
-        $source = $this->proxy;
+        if (1 === count($pathTracks)) {
+            $this->proxy->set($pathTracks[0], $value);
 
-        if (count($pathTracks)) {
-            $element = $this->get(implode($this->separator, $pathTracks));
-
-            assert(is_array($element) || is_object($element));
-
-            $source = new self($element);
+            return $this;
         }
 
-        $source->set($track, $value);
+        $track = array_shift($pathTracks);
 
-        return $this;
+        if (!$this->proxy->isInitialised($track)) {
+            $this->proxy->init($track);
+        }
+
+        $newElement = $this->proxy->get($track);
+
+        assert(is_array($newElement) || is_object($newElement));
+
+        $next = new self($newElement);
+
+        $newPath = implode($this->separator, $pathTracks);
+
+        return $next->set($newPath, $value);
     }
 
     public function has(string $path): bool
@@ -97,12 +100,96 @@ final class Dot
             !is_array($value)
             && !is_object($value)
         ) {
-            return false;
+            throw new InvalidPathException('Element of type `'.get_debug_type($value).'` has no child elements');
         }
 
         $next = new self($value);
 
         return $next->has(implode($this->separator, $pathTracks));
+    }
+
+    public function isInitialised(string $path): bool
+    {
+        $pathTracks = explode($this->separator, $path);
+        $track      = array_shift($pathTracks);
+
+        if (!$this->proxy->isInitialised($track)) {
+            return false;
+        }
+
+        $value = $this->proxy->get($track);
+
+        if (!count($pathTracks)) {
+            return true;
+        }
+
+        if (
+            !is_array($value)
+            && !is_object($value)
+        ) {
+            return false;
+        }
+
+        $next = new self($value);
+
+        return $next->isInitialised(implode($this->separator, $pathTracks));
+    }
+
+    public function init(string $path, string|null $type = null): self
+    {
+        $pathTracks = explode($this->separator, $path);
+
+        if (1 === count($pathTracks)) {
+            $this->proxy->init($pathTracks[0], $type);
+
+            return $this;
+        }
+
+        $track = array_shift($pathTracks);
+
+        if (!$this->proxy->isInitialised($track)) {
+            $this->proxy->init($track);
+        }
+
+        $newElement = $this->proxy->get($track);
+
+        assert(is_array($newElement) || is_object($newElement));
+
+        $next = new self($newElement);
+
+        $newPath = implode($this->separator, $pathTracks);
+
+        return $next->init($newPath, $type);
+    }
+
+    public function unset(string $path): self
+    {
+        $pathTracks = explode($this->separator, $path);
+
+        if (1 === count($pathTracks)) {
+            $this->proxy->unset($pathTracks[0]);
+
+            return $this;
+        }
+
+        $track = array_shift($pathTracks);
+
+        if (!$this->proxy->isInitialised($track)) {
+            return $this;
+        }
+
+        $newElement = $this->proxy->get($track);
+
+        assert(is_array($newElement) || is_object($newElement));
+
+        $next = new self($newElement);
+
+        $newPath = implode($this->separator, $pathTracks);
+        $next->unset($newPath);
+
+        $this->set($track, $newElement);
+
+        return $this;
     }
 
     public function getReflectionType(string $path): ReflectionType|null
@@ -119,7 +206,7 @@ final class Dot
                 && !is_object($element)
             ) {
                 $type = get_debug_type($element);
-                throw new InvalidPathException('Element of type '.$type.' has no child element');
+                throw new PathNotFoundException('Element of type '.$type.' has no child element');
             }
             $source = new self($element);
         }

@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace WebFu\DotNotation\Proxy;
 
-use WebFu\DotNotation\Exception\InvalidPathException;
+use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\Reflection\ReflectionClass;
 use WebFu\Reflection\ReflectionMethod;
@@ -27,7 +27,7 @@ class ClassProxy implements ProxyInterface
      */
     private array $keys = [];
 
-    public function __construct(private object $element)
+    public function __construct(private object &$element)
     {
         $reflection = new ReflectionClass($this->element);
 
@@ -56,7 +56,7 @@ class ClassProxy implements ProxyInterface
     public function get(int|string $key): mixed
     {
         if (!$this->has($key)) {
-            throw new InvalidPathException('Key `'.$key.'` not found');
+            throw new PathNotFoundException('Key `'.$key.'` not found');
         }
 
         $key = (string) $key;
@@ -73,7 +73,7 @@ class ClassProxy implements ProxyInterface
     public function set(int|string $key, mixed $value): ProxyInterface
     {
         if (!$this->has($key)) {
-            throw new InvalidPathException('Key `'.$key.'` not found');
+            throw new PathNotFoundException('Key `'.$key.'` not found');
         }
 
         $key = (string) $key;
@@ -87,10 +87,82 @@ class ClassProxy implements ProxyInterface
         return $this;
     }
 
+    public function isInitialised(string|int $key): bool
+    {
+        if (!$this->has($key)) {
+            throw new PathNotFoundException('Key `'.$key.'` not found');
+        }
+
+        $key = (string) $key;
+
+        $reflection = new ReflectionClass($this->element);
+
+        if (str_ends_with($key, '()')) {
+            $method = str_replace('()', '', $key);
+
+            return $reflection->hasMethod($method);
+        }
+
+        /** @var ReflectionProperty $property */
+        $property = $reflection->getProperty($key);
+
+        return $property->isInitialized($this->element);
+    }
+
+    public function init(int|string $key, string|null $type = null): ProxyInterface
+    {
+        if (!$this->has($key)) {
+            throw new PathNotFoundException('Key `'.$key.'` not found');
+        }
+
+        $key = (string) $key;
+
+        if (str_ends_with($key, '()')) {
+            throw new UnsupportedOperationException('Cannot init a class method');
+        }
+
+        if ($this->isInitialised($key)) {
+            return $this;
+        }
+
+        /** @var ReflectionType $reflectionType */
+        $reflectionType = $this->getReflectionType($key);
+
+        if (
+            count($reflectionType->getTypeNames()) > 1
+            && null === $type
+        ) {
+            throw new UnsupportedOperationException('In case of union type you must specify the type');
+        }
+
+        $type ??= $reflectionType->getTypeNames()[0];
+
+        $this->element->{$key} = ValueInitializer::init($type);
+
+        return $this;
+    }
+
+    public function unset(int|string $key): ProxyInterface
+    {
+        if (!$this->has($key)) {
+            return $this;
+        }
+
+        $key = (string) $key;
+
+        if (str_ends_with($key, '()')) {
+            throw new UnsupportedOperationException('Cannot unset a class method');
+        }
+
+        unset($this->element->{$key});
+
+        return $this;
+    }
+
     public function getReflectionType(int|string $key): ReflectionType|null
     {
         if (!$this->has($key)) {
-            throw new InvalidPathException('Key `'.$key.'` not found');
+            throw new PathNotFoundException('Key `'.$key.'` not found');
         }
 
         $key = (string) $key;

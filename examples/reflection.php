@@ -15,7 +15,7 @@ use WebFu\DotNotation\Dot;
 
 require __DIR__.'/../vendor/autoload.php';
 
-$class = new class() {
+$class = new class {
     public string $property = 'test';
 
     public function method(): string

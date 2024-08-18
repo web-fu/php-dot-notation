@@ -11,15 +11,18 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace WebFu\DotNotation\Tests\Integration\Proxy;
+namespace WebFu\DotNotation\Tests\Proxy;
 
 use PHPUnit\Framework\TestCase;
-use WebFu\DotNotation\Exception\InvalidPathException;
+use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Proxy\ArrayProxy;
+use WebFu\DotNotation\Tests\TestData\SimpleClass;
 use WebFu\Reflection\ReflectionType;
 
 /**
  * @coversDefaultClass \WebFu\DotNotation\Proxy\ArrayProxy
+ *
+ * @group unit
  */
 class ArrayProxyTest extends TestCase
 {
@@ -149,7 +152,7 @@ class ArrayProxyTest extends TestCase
         $element = [];
 
         $this->expectExceptionMessage('Key `foo` not found');
-        $this->expectException(InvalidPathException::class);
+        $this->expectException(PathNotFoundException::class);
 
         $wrapper = new ArrayProxy($element);
         $wrapper->get('foo');
@@ -174,10 +177,79 @@ class ArrayProxyTest extends TestCase
         $element = [];
 
         $this->expectExceptionMessage('Key `foo` not found');
-        $this->expectException(InvalidPathException::class);
+        $this->expectException(PathNotFoundException::class);
 
         $wrapper = new ArrayProxy($element);
         $wrapper->set('foo', 2);
+    }
+
+    public function testIsInitialised(): void
+    {
+        $element = [
+            'foo' => null,
+        ];
+
+        $proxy = new ArrayProxy($element);
+        $this->assertFalse($proxy->isInitialised('foo'));
+
+        $element['foo'] = new SimpleClass();
+
+        $this->assertTrue($proxy->isInitialised('foo'));
+    }
+
+    /**
+     * @covers ::init
+     */
+    public function testInit(): void
+    {
+        $element = [
+            'foo' => null,
+        ];
+
+        $proxy = new ArrayProxy($element);
+        $proxy->init('foo', SimpleClass::class);
+        $this->assertInstanceOf(SimpleClass::class, $element['foo']);
+
+        $element = [];
+
+        $proxy = new ArrayProxy($element);
+        $proxy->init('foo');
+        $this->assertNull($element['foo']);
+    }
+
+    public function testInitChangesNothingIfAlreadyInitialised(): void
+    {
+        $element = ['foo' => 'bar'];
+
+        $proxy = new ArrayProxy($element);
+
+        $proxy->init('foo');
+
+        $this->assertEquals(['foo' => 'bar'], $element);
+    }
+
+    /**
+     * @covers ::unset
+     */
+    public function testUnset(): void
+    {
+        $element = [
+            'foo' => 1,
+        ];
+
+        $proxy = new ArrayProxy($element);
+        $proxy->unset('foo');
+        $this->assertArrayNotHasKey('foo', $element);
+    }
+
+    public function testUnsetChangeNothingIfNothingToUnset(): void
+    {
+        $element = ['bar' => 'baz'];
+
+        $proxy = new ArrayProxy($element);
+        $proxy->unset('foo');
+
+        $this->assertEquals(['bar' => 'baz'], $element);
     }
 
     /**
@@ -201,7 +273,7 @@ class ArrayProxyTest extends TestCase
         $element = [];
 
         $this->expectExceptionMessage('Key `foo` not found');
-        $this->expectException(InvalidPathException::class);
+        $this->expectException(PathNotFoundException::class);
 
         $proxy = new ArrayProxy($element);
         $proxy->getReflectionType('foo');

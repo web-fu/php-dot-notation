@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace WebFu\DotNotation\Proxy;
 
-use WebFu\DotNotation\Exception\InvalidPathException;
+use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\Reflection\ReflectionType;
 
 class ArrayProxy implements ProxyInterface
@@ -41,7 +41,7 @@ class ArrayProxy implements ProxyInterface
     public function get(int|string $key): mixed
     {
         if (!$this->has($key)) {
-            throw new InvalidPathException('Key `'.$key.'` not found');
+            throw new PathNotFoundException('Key `'.$key.'` not found');
         }
 
         return $this->element[$key];
@@ -50,7 +50,7 @@ class ArrayProxy implements ProxyInterface
     public function set(int|string $key, mixed $value): self
     {
         if (!$this->has($key)) {
-            throw new InvalidPathException('Key `'.$key.'` not found');
+            throw new PathNotFoundException('Key `'.$key.'` not found');
         }
 
         $this->element[$key] = $value;
@@ -58,10 +58,37 @@ class ArrayProxy implements ProxyInterface
         return $this;
     }
 
+    public function isInitialised(int|string $key): bool
+    {
+        return isset($this->element[$key]);
+    }
+
+    public function init(int|string $key, string|null $type = null): self
+    {
+        if ($this->isInitialised($key)) {
+            return $this;
+        }
+
+        $this->element[$key] = ValueInitializer::init($type);
+
+        return $this;
+    }
+
+    public function unset(int|string $key): self
+    {
+        if (!$this->has($key)) {
+            return $this;
+        }
+
+        unset($this->element[$key]);
+
+        return $this;
+    }
+
     public function getReflectionType(int|string $key): ReflectionType|null
     {
         if (!$this->has($key)) {
-            throw new InvalidPathException('Key `'.$key.'` not found');
+            throw new PathNotFoundException('Key `'.$key.'` not found');
         }
 
         $value = $this->element[$key];
