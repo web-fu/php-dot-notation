@@ -461,13 +461,13 @@ class DotTest extends TestCase
     }
 
     /**
-     * @covers ::isInitialized
+     * @covers ::isInitialised
      *
      * @dataProvider initializedCaseProvider
      *
      * @param mixed[]|object $element
      */
-    public function testIsInitialized(object|array $element, string $path, bool $expected): void
+    public function testIsInitialised(object|array $element, string $path, bool $expected): void
     {
         $dot = new Dot($element);
         $this->assertEquals($expected, $dot->isInitialised($path));
