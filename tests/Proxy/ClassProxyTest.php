@@ -18,6 +18,7 @@ use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\DotNotation\Proxy\ClassProxy;
 use WebFu\DotNotation\Tests\TestData\ChildClass;
+use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
 use WebFu\DotNotation\Tests\TestData\SimpleClass;
 use WebFu\Reflection\ReflectionType;
 
@@ -28,6 +29,24 @@ use WebFu\Reflection\ReflectionType;
  */
 class ClassProxyTest extends TestCase
 {
+    /**
+     * @covers ::__construct
+     */
+    public function testConstruct(): void
+    {
+        $element = new ChildClass();
+        $proxy   = new ClassProxy($element);
+
+        $this->assertEquals([
+            'public',
+            'publicParent',
+            'publicTrait',
+            'public()',
+            'publicParent()',
+            'publicTrait()',
+        ], $proxy->getKeys());
+    }
+
     /**
      * @covers ::has
      *
@@ -179,6 +198,9 @@ class ClassProxyTest extends TestCase
         $this->assertSame('bar', $element->property);
     }
 
+    /**
+     * @covers ::set
+     */
     public function testSetFailIfKeyDoNotExists(): void
     {
         $element = new class {
@@ -189,78 +211,6 @@ class ClassProxyTest extends TestCase
 
         $proxy = new ClassProxy($element);
         $proxy->set('property', 'bar');
-    }
-
-    public function testIsInitialised(): void
-    {
-        $element = new class {
-            public string|null $foo;
-        };
-
-        $proxy = new ClassProxy($element);
-
-        $this->assertFalse($proxy->isInitialised('foo'));
-
-        $element->foo = 'bar';
-
-        $this->assertTrue($proxy->isInitialised('foo'));
-    }
-
-    public function testInit(): void
-    {
-        $element = new class {
-            public SimpleClass $property;
-            /**
-             * @var mixed[]
-             */
-            public array $array;
-        };
-
-        $proxy = new ClassProxy($element);
-        $proxy->init('property');
-
-        $this->assertInstanceOf(SimpleClass::class, $element->property);
-
-        $proxy->init('array');
-        $this->assertSame([], $element->array);
-    }
-
-    public function testInitFailIfScalarProperty(): void
-    {
-        $element = new class {
-            public string $string;
-        };
-
-        $proxy = new ClassProxy($element);
-
-        $this->expectException(UnsupportedOperationException::class);
-        $this->expectExceptionMessage('Cannot init type `string`');
-
-        $proxy->init('string');
-    }
-
-    public function testUnset(): void
-    {
-        $element = new class {
-            public string $property = 'foo';
-        };
-
-        $proxy = new ClassProxy($element);
-        $proxy->unset('property');
-
-        $this->assertFalse(isset($element->property));
-    }
-
-    public function testUnsetChangesNothingIfNothingToUnset(): void
-    {
-        $element = new SimpleClass();
-
-        $proxy = new ClassProxy($element);
-        $proxy->unset('propertyNotExists');
-
-        $expected = new SimpleClass();
-
-        $this->assertEquals($expected, $element);
     }
 
     /**
@@ -279,6 +229,207 @@ class ClassProxyTest extends TestCase
 
         $proxy = new ClassProxy($element);
         $proxy->set('method()', 'bar');
+    }
+
+    /**
+     * @covers ::isInitialised
+     */
+    public function testIsInitialised(): void
+    {
+        $element = new class {
+            public string|null $foo;
+
+            public function method(): void
+            {
+            }
+        };
+
+        $proxy = new ClassProxy($element);
+
+        $this->assertFalse($proxy->isInitialised('foo'));
+
+        $element->foo = 'bar';
+
+        $this->assertTrue($proxy->isInitialised('foo'));
+        $this->assertTrue($proxy->isInitialised('method()'));
+    }
+
+    /**
+     * @covers ::isInitialised
+     */
+    public function testIsInitialisedFailIfNoKey(): void
+    {
+        $element = new class {
+        };
+
+        $this->expectException(PathNotFoundException::class);
+        $this->expectExceptionMessage('Key `foo` not found');
+
+        $proxy = new ClassProxy($element);
+        $proxy->isInitialised('foo');
+    }
+
+    /**
+     * @covers ::init
+     */
+    public function testInit(): void
+    {
+        $element = new class {
+            public SimpleClass $property;
+            /**
+             * @var mixed[]
+             */
+            public array $array;
+        };
+
+        $proxy = new ClassProxy($element);
+        $proxy->init('property');
+
+        $this->assertInstanceOf(SimpleClass::class, $element->property);
+
+        $proxy->init('array');
+        $this->assertSame([], $element->array);
+
+        $element = new ClassWithComplexProperties();
+        $proxy   = new ClassProxy($element);
+
+        $proxy->init('union', SimpleClass::class);
+
+        $this->assertInstanceOf(SimpleClass::class, $element->union);
+    }
+
+    /**
+     * @covers ::init
+     */
+    public function testInitChangesNothingIfAlreadyInitialised(): void
+    {
+        $element         = new SimpleClass();
+        $element->public = 'foo';
+
+        $proxy = new ClassProxy($element);
+
+        $proxy->init('public');
+
+        $expected         = new SimpleClass();
+        $expected->public = 'foo';
+
+        $this->assertEquals($expected, $element);
+    }
+
+    /**
+     * @covers ::init
+     */
+    public function testInitFailIfNoKeyFound(): void
+    {
+        $element = new class {
+        };
+
+        $proxy = new ClassProxy($element);
+
+        $this->expectException(PathNotFoundException::class);
+        $this->expectExceptionMessage('Key `foo` not found');
+
+        $proxy->init('foo');
+    }
+
+    /**
+     * @covers ::init
+     */
+    public function testInitFailIfTryToInitialiseMethod(): void
+    {
+        $element = new class {
+            public function method(): void
+            {
+            }
+        };
+
+        $proxy = new ClassProxy($element);
+
+        $this->expectException(UnsupportedOperationException::class);
+        $this->expectExceptionMessage('Cannot init a class method');
+
+        $proxy->init('method()');
+    }
+
+    /**
+     * @covers ::init
+     */
+    public function testInitFailIfScalarProperty(): void
+    {
+        $element = new class {
+            public string $string;
+        };
+
+        $proxy = new ClassProxy($element);
+
+        $this->expectException(UnsupportedOperationException::class);
+        $this->expectExceptionMessage('Cannot init type `string`');
+
+        $proxy->init('string');
+    }
+
+    /**
+     * @covers ::init
+     */
+    public function testInitFailIfUnionPropertyNotDeclared(): void
+    {
+        $element = new ClassWithComplexProperties();
+
+        $proxy = new ClassProxy($element);
+
+        $this->expectException(UnsupportedOperationException::class);
+        $this->expectExceptionMessage('In case of union type you must specify the type');
+
+        $proxy->init('union');
+    }
+
+    /**
+     * @covers ::unset
+     */
+    public function testUnset(): void
+    {
+        $element = new class {
+            public string $property = 'foo';
+        };
+
+        $proxy = new ClassProxy($element);
+        $proxy->unset('property');
+
+        $this->assertFalse(isset($element->property));
+    }
+
+    /**
+     * @covers ::unset
+     */
+    public function testUnsetChangesNothingIfNothingToUnset(): void
+    {
+        $element = new SimpleClass();
+
+        $proxy = new ClassProxy($element);
+        $proxy->unset('propertyNotExists');
+
+        $expected = new SimpleClass();
+
+        $this->assertEquals($expected, $element);
+    }
+
+    /**
+     * @covers ::unset
+     */
+    public function testUnsetFailIfKeyIsMethod(): void
+    {
+        $element = new class {
+            public function method(): void
+            {
+            }
+        };
+
+        $proxy = new ClassProxy($element);
+
+        $this->expectException(UnsupportedOperationException::class);
+        $this->expectExceptionMessage('Cannot unset a class method');
+
+        $proxy->unset('method()');
     }
 
     /**

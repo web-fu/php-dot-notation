@@ -217,6 +217,17 @@ class ArrayProxyTest extends TestCase
         $this->assertNull($element['foo']);
     }
 
+    public function testInitChangesNothingIfAlreadyInitialised(): void
+    {
+        $element = ['foo' => 'bar'];
+
+        $proxy = new ArrayProxy($element);
+
+        $proxy->init('foo');
+
+        $this->assertEquals(['foo' => 'bar'], $element);
+    }
+
     /**
      * @covers ::unset
      */

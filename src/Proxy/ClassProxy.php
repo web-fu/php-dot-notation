@@ -27,7 +27,7 @@ class ClassProxy implements ProxyInterface
      */
     private array $keys = [];
 
-    public function __construct(private object $element)
+    public function __construct(private object &$element)
     {
         $reflection = new ReflectionClass($this->element);
 

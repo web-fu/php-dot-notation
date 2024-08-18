@@ -16,5 +16,6 @@ namespace WebFu\DotNotation\Tests\TestData;
 class ClassWithComplexProperties
 {
     public SimpleClass $simple;
+    public ChildClass|SimpleClass $union;
     public array $array;
 }
