@@ -25,5 +25,5 @@ jobs:
                   extensions: mbstring
             - name: Install dependencies
               run: composer install --prefer-dist --no-progress --no-suggest ${{ matrix.composer-options }}
-            - name: Run the tests
+            - name: Run the code style check
               run: composer run cs

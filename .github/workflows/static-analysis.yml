@@ -22,5 +22,5 @@ jobs:
                   extensions: pcov, mbstring, posix
             - name: Install dependencies
               run: composer install --prefer-dist --no-progress --no-suggest ${{ matrix.composer-options }}
-            - name: Run the tests
+            - name: Run the static analysis
               run: composer run phpstan
