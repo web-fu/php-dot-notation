@@ -147,7 +147,7 @@ class ArrayProxyTest extends TestCase
     /**
      * @covers ::get
      */
-    public function testGetFailIfKeyDoNotExists(): void
+    public function testGetFailsIfKeyDoNotExists(): void
     {
         $element = [];
 
@@ -172,7 +172,7 @@ class ArrayProxyTest extends TestCase
     /**
      * @covers ::set
      */
-    public function testSetFailIfKeyDoNotExists(): void
+    public function testSetFailsIfKeyDoNotExists(): void
     {
         $element = [];
 
@@ -211,6 +211,9 @@ class ArrayProxyTest extends TestCase
         $this->assertInstanceOf(SimpleClass::class, $element['foo']);
     }
 
+    /**
+     * @covers ::init
+     */
     public function testInitChangesNothingIfAlreadyInitialised(): void
     {
         $element = ['foo' => 'bar'];
@@ -225,7 +228,7 @@ class ArrayProxyTest extends TestCase
     /**
      * @covers ::init
      */
-    public function testInitFailIfNoKeyFound(): void
+    public function testInitFailsIfNoKeyFound(): void
     {
         $element = [];
 
@@ -248,6 +251,9 @@ class ArrayProxyTest extends TestCase
         $this->assertInstanceOf(SimpleClass::class, $element['foo']);
     }
 
+    /**
+     * @covers ::create
+     */
     public function testCreateChangesNothingIfAlreadyExists(): void
     {
         $element = ['foo' => 'bar'];
@@ -273,6 +279,9 @@ class ArrayProxyTest extends TestCase
         $this->assertArrayNotHasKey('foo', $element);
     }
 
+    /**
+     * @covers ::unset
+     */
     public function testUnsetChangeNothingIfNothingToUnset(): void
     {
         $element = ['bar' => 'baz'];
@@ -299,7 +308,7 @@ class ArrayProxyTest extends TestCase
     /**
      * @covers ::getReflectionType
      */
-    public function testGetReflectionTypeFailIfKeyDoNotExists(): void
+    public function testGetReflectionTypeFailsIfKeyDoNotExists(): void
     {
         $element = [];
 

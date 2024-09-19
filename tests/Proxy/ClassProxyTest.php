@@ -174,7 +174,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::get
      */
-    public function testGetFailIfKeyDoNotExists(): void
+    public function testGetFailsIfKeyDoNotExists(): void
     {
         $element = new class {
         };
@@ -220,7 +220,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::set
      */
-    public function testSetFailIfKeyDoNotExists(): void
+    public function testSetFailsIfKeyDoNotExists(): void
     {
         $element = new class {
         };
@@ -235,7 +235,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::set
      */
-    public function testSetFailIfKeyIsMethod(): void
+    public function testSetFailsIfKeyIsMethod(): void
     {
         $element = new class {
             public function method(): void
@@ -276,7 +276,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::isInitialised
      */
-    public function testIsInitialisedFailIfNoKey(): void
+    public function testIsInitialisedFailsIfNoKey(): void
     {
         $element = new class {
         };
@@ -338,7 +338,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::init
      */
-    public function testInitFailIfNoKeyFound(): void
+    public function testInitFailsIfNoKeyFound(): void
     {
         $element = new class {
         };
@@ -354,7 +354,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::init
      */
-    public function testInitFailIfTryToInitialiseMethod(): void
+    public function testInitFailsIfTryToInitialiseMethod(): void
     {
         $element = new class {
             public function method(): void
@@ -373,7 +373,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::init
      */
-    public function testInitFailIfUnionPropertyNotDeclared(): void
+    public function testInitFailsIfUnionPropertyNotDeclared(): void
     {
         $element = new ClassWithComplexProperties();
 
@@ -482,7 +482,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::unset
      */
-    public function testUnsetFailIfKeyIsMethod(): void
+    public function testUnsetFailsIfKeyIsMethod(): void
     {
         $element = new class {
             public function method(): void
@@ -522,7 +522,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::getReflectionType
      */
-    public function testGetReflectionTypeFailIfKeyDoNotExists(): void
+    public function testGetReflectionTypeFailsIfKeyDoNotExists(): void
     {
         $element = new class {
         };

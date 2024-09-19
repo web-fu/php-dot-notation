@@ -20,6 +20,7 @@ use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Tests\TestData\ChildClass;
 use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
 use WebFu\DotNotation\Tests\TestData\SimpleClass;
+use WebFu\Reflection\ReflectionClass;
 use WebFu\Reflection\ReflectionType;
 
 /**
@@ -568,6 +569,9 @@ class DotTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::isInitialised
+     */
     public function testIsInitializedFalse(): void
     {
         $element = new ClassWithComplexProperties();
@@ -615,6 +619,22 @@ class DotTest extends TestCase
         $dot->init('0.simple');
 
         $this->assertInstanceOf(SimpleClass::class, $element[0]->simple);
+    }
+
+    /**
+     * @covers ::init
+     */
+    public function testInitDoesNotChangeIfAlreadyInitialized(): void
+    {
+        $element = [new ClassWithComplexProperties()];
+        $element[0]->simple = new SimpleClass();
+        $element[0]->simple->public = 'test';
+
+        $dot = new Dot($element);
+        $dot->init('0.simple');
+
+        $this->assertInstanceOf(SimpleClass::class, $element[0]->simple);
+        $this->assertEquals('test', $element[0]->simple->public);
     }
 
     /**
@@ -677,6 +697,9 @@ class DotTest extends TestCase
         $this->assertArrayNotHasKey('foo', $test->array);
     }
 
+    /**
+     * @covers ::unset
+     */
     public function testUnsetDoesNotChangeIfNothingToUnset(): void
     {
         $element = ['foo' => 1];
@@ -684,6 +707,19 @@ class DotTest extends TestCase
         $dot->unset('bar');
 
         $this->assertEquals(['foo' => 1], $element);
+    }
+
+    /**
+     * @covers ::unset
+     */
+    public function testUnsetDoesNotChangeIfNotInitialized(): void
+    {
+        $element = new SimpleClass();
+        $dot     = new Dot($element);
+        $dot->unset('public');
+
+        $reflection = new ReflectionClass($element);
+        $this->assertFalse($reflection->getProperty('public')->isInitialized($element));
     }
 
     /**
@@ -754,8 +790,6 @@ class DotTest extends TestCase
 
     /**
      * @covers ::undotify
-     *
-     * @group test
      */
     public function testUndotify(): void
     {
