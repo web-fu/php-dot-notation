@@ -14,11 +14,14 @@ declare(strict_types=1);
 namespace WebFu\DotNotation\Tests\Proxy;
 
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\DotNotation\Proxy\ClassProxy;
 use WebFu\DotNotation\Tests\TestData\ChildClass;
+use WebFu\DotNotation\Tests\TestData\ClassWithAllowDynamicProperties;
 use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
+use WebFu\DotNotation\Tests\TestData\ClassWithMagicMethods;
 use WebFu\DotNotation\Tests\TestData\SimpleClass;
 use WebFu\Reflection\ReflectionType;
 
@@ -381,6 +384,67 @@ class ClassProxyTest extends TestCase
         $this->expectExceptionMessage('In case of union type you must specify the type');
 
         $proxy->init('union');
+    }
+
+    /**
+     * @covers ::create
+     *
+     * @dataProvider classWithDynamicPropertiesProvider
+     */
+    public function testCreate(object $element): void
+    {
+        $proxy = new ClassProxy($element);
+        $proxy->create('foo', SimpleClass::class);
+
+        $this->assertInstanceOf(SimpleClass::class, $element->foo);
+    }
+
+    public function classWithDynamicPropertiesProvider(): iterable
+    {
+        yield 'stdClass' => [
+            'element' => new stdClass(),
+        ];
+        yield 'classAllowDynamicProperties' => [
+            'element' => new ClassWithAllowDynamicProperties(),
+        ];
+        yield 'classWithMagicMethods' => [
+            'element' => new ClassWithMagicMethods(),
+        ];
+    }
+
+    /**
+     * @covers ::create
+     */
+    public function testCreateChangesNothingIfPropertyAlreadyExists(): void
+    {
+        $element              = new stdClass();
+        $element->foo         = new SimpleClass();
+        $element->foo->public = 'test';
+
+        $proxy = new ClassProxy($element);
+
+        $proxy->create('foo', SimpleClass::class);
+
+        $expected              = new stdClass();
+        $expected->foo         = new SimpleClass();
+        $expected->foo->public = 'test';
+
+        $this->assertEquals($expected, $element);
+    }
+
+    /**
+     * @covers ::create
+     */
+    public function testCreateFailsIfNoDynamicPropertiesAllowed(): void
+    {
+        $element = new SimpleClass();
+
+        $proxy = new ClassProxy($element);
+
+        $this->expectException(UnsupportedOperationException::class);
+        $this->expectExceptionMessage('Cannot create a new property');
+
+        $proxy->create('foo', SimpleClass::class);
     }
 
     /**

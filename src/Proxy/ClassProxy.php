@@ -22,27 +22,13 @@ use WebFu\Reflection\ReflectionType;
 
 class ClassProxy implements ProxyInterface
 {
-    /**
-     * @var array<ReflectionProperty|ReflectionMethod>
-     */
-    private array $keys = [];
-
     public function __construct(private object &$element)
     {
-        $reflection = new ReflectionClass($this->element);
-
-        foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
-            $this->keys[$property->getName()] = $property;
-        }
-
-        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-            $this->keys[$method->getName().'()'] = $method;
-        }
     }
 
     public function has(int|string $key): bool
     {
-        return array_key_exists($key, $this->keys);
+        return in_array($key, $this->getKeys(), true);
     }
 
     /**
@@ -50,7 +36,19 @@ class ClassProxy implements ProxyInterface
      */
     public function getKeys(): array
     {
-        return array_keys($this->keys);
+        $keys = [];
+
+        $reflection = new ReflectionClass($this->element);
+
+        foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
+            $keys[] = $property->getName();
+        }
+
+        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            $keys[] = $method->getName().'()';
+        }
+
+        return $keys;
     }
 
     public function get(int|string $key): mixed
@@ -109,6 +107,9 @@ class ClassProxy implements ProxyInterface
         return $property->isInitialized($this->element);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function init(int|string $key, string|null $type = null): ProxyInterface
     {
         if (!$this->has($key)) {
@@ -136,6 +137,36 @@ class ClassProxy implements ProxyInterface
         }
 
         $type ??= $reflectionType->getTypeNames()[0];
+
+        $this->element->{$key} = ValueInitializer::init($type);
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function create(int|string $key, string|null $type = null): ProxyInterface
+    {
+        if ($this->has($key)) {
+            return $this;
+        }
+
+        $reflection = new ReflectionClass($this->element);
+
+        $checkStdClass  = 'stdClass' === $reflection->getName();
+        $checkAttribute = [] !== $reflection->getAttributes('AllowDynamicProperties');
+        $checkMethod    = $reflection->hasMethod('__set');
+
+        if (
+            !$checkStdClass
+            && !$checkAttribute
+            && !$checkMethod
+        ) {
+            throw new UnsupportedOperationException('Cannot create a new property');
+        }
+
+        $key = (string) $key;
 
         $this->element->{$key} = ValueInitializer::init($type);
 

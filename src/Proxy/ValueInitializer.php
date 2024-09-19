@@ -24,8 +24,11 @@ class ValueInitializer
         }
 
         return match ($type) {
-            null    => null,
+            null, 'mixed' => null,
             'array' => [],
+            'int'   => 0,
+            'float' => 0.0,
+            'bool'  => false,
             default => throw new UnsupportedOperationException('Cannot init type `'.$type.'`'),
         };
     }

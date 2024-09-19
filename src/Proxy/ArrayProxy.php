@@ -69,6 +69,21 @@ class ArrayProxy implements ProxyInterface
             return $this;
         }
 
+        if (!$this->has($key)) {
+            throw new PathNotFoundException('Key `'.$key.'` not found');
+        }
+
+        $this->element[$key] = ValueInitializer::init($type);
+
+        return $this;
+    }
+
+    public function create(int|string $key, string|null $type = null): ProxyInterface
+    {
+        if ($this->has($key)) {
+            return $this;
+        }
+
         $this->element[$key] = ValueInitializer::init($type);
 
         return $this;

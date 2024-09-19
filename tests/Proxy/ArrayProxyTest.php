@@ -209,12 +209,6 @@ class ArrayProxyTest extends TestCase
         $proxy = new ArrayProxy($element);
         $proxy->init('foo', SimpleClass::class);
         $this->assertInstanceOf(SimpleClass::class, $element['foo']);
-
-        $element = [];
-
-        $proxy = new ArrayProxy($element);
-        $proxy->init('foo');
-        $this->assertNull($element['foo']);
     }
 
     public function testInitChangesNothingIfAlreadyInitialised(): void
@@ -224,6 +218,43 @@ class ArrayProxyTest extends TestCase
         $proxy = new ArrayProxy($element);
 
         $proxy->init('foo');
+
+        $this->assertEquals(['foo' => 'bar'], $element);
+    }
+
+    /**
+     * @covers ::init
+     */
+    public function testInitFailIfNoKeyFound(): void
+    {
+        $element = [];
+
+        $this->expectExceptionMessage('Key `foo` not found');
+        $this->expectException(PathNotFoundException::class);
+
+        $proxy = new ArrayProxy($element);
+        $proxy->init('foo');
+    }
+
+    /**
+     * @covers ::create
+     */
+    public function testCreate(): void
+    {
+        $element = [];
+
+        $proxy = new ArrayProxy($element);
+        $proxy->create('foo', SimpleClass::class);
+        $this->assertInstanceOf(SimpleClass::class, $element['foo']);
+    }
+
+    public function testCreateChangesNothingIfAlreadyExists(): void
+    {
+        $element = ['foo' => 'bar'];
+
+        $proxy = new ArrayProxy($element);
+
+        $proxy->create('foo');
 
         $this->assertEquals(['foo' => 'bar'], $element);
     }

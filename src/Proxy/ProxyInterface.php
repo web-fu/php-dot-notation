@@ -30,7 +30,15 @@ interface ProxyInterface
 
     public function isInitialised(string|int $key): bool;
 
+    /**
+     * Initialize a key if exists.
+     */
     public function init(string|int $key, string|null $type = null): self;
+
+    /**
+     * Create a new key if possible.
+     */
+    public function create(string|int $key): self;
 
     public function unset(string|int $key): self;
 
