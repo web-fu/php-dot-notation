@@ -21,6 +21,7 @@ use WebFu\DotNotation\Tests\TestData\ChildClass;
 use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
 use WebFu\DotNotation\Tests\TestData\SimpleClass;
 use WebFu\Reflection\ReflectionClass;
+use WebFu\Reflection\ReflectionProperty;
 use WebFu\Reflection\ReflectionType;
 
 /**
@@ -721,7 +722,7 @@ class DotTest extends TestCase
         $reflection         = new ReflectionClass($element);
         $reflectionProperty = $reflection->getProperty('public');
 
-        $this->assertInstanceof(ReflectionType::class, $reflectionProperty);
+        $this->assertInstanceof(ReflectionProperty::class, $reflectionProperty);
         $this->assertFalse($reflectionProperty->isInitialized($element));
     }
 
