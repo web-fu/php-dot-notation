@@ -445,6 +445,9 @@ class DotTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::has
+     */
     public function testHasNot(): void
     {
         $element = new class {
@@ -582,6 +585,9 @@ class DotTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::init
+     */
     public function testInit(): void
     {
         $element = [new ClassWithComplexProperties()];
@@ -592,6 +598,38 @@ class DotTest extends TestCase
         $this->assertInstanceOf(SimpleClass::class, $element[0]->simple);
     }
 
+    /**
+     * @covers ::create
+     *
+     * @dataProvider elementAndPathProvider
+     */
+    public function testCreate(array|object $element, string $path): void
+    {
+        $dot = new Dot($element);
+        $dot->create($path, 'string');
+
+        $this->assertEquals('', $dot->get($path));
+    }
+
+    public function elementAndPathProvider(): iterable
+    {
+        yield 'array' => [
+            'element' => [],
+            'path'    => 'foo',
+        ];
+        yield 'object' => [
+            'element' => new stdClass(),
+            'path'    => 'foo',
+        ];
+        yield 'array.array' => [
+            'element' => [],
+            'path'    => 'foo.bar',
+        ];
+    }
+
+    /**
+     * @covers ::unset
+     */
     public function testUnset(): void
     {
         $element = ['foo' => 1];
@@ -624,6 +662,9 @@ class DotTest extends TestCase
         $this->assertEquals(['foo' => 1], $element);
     }
 
+    /**
+     * @covers ::getReflectionType
+     */
     public function testGetReflectionType(): void
     {
         $element = ['foo' => 1];
@@ -687,6 +728,11 @@ class DotTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::undotify
+     *
+     * @group test
+     */
     public function testUndotify(): void
     {
         $arrayDotified = [
@@ -702,6 +748,30 @@ class DotTest extends TestCase
             'baz' => [
                 'qux'  => 'quux',
                 'quuz' => 'corge',
+            ],
+        ], $array);
+
+        $arrayWithNumericIndex = [
+            'foo'        => 'bar',
+            'baz.0.qux'  => 'quux',
+            'baz.0.quuz' => 'corge',
+            'baz.1.qux'  => 'abc',
+            'baz.1.quuz' => 'def',
+        ];
+
+        $array = Dot::undotify($arrayWithNumericIndex);
+
+        $this->assertEquals([
+            'foo' => 'bar',
+            'baz' => [
+                [
+                    'qux'  => 'quux',
+                    'quuz' => 'corge',
+                ],
+                [
+                    'qux'  => 'abc',
+                    'quuz' => 'def',
+                ],
             ],
         ], $array);
     }

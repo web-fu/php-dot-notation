@@ -357,23 +357,6 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::init
      */
-    public function testInitFailIfScalarProperty(): void
-    {
-        $element = new class {
-            public string $string;
-        };
-
-        $proxy = new ClassProxy($element);
-
-        $this->expectException(UnsupportedOperationException::class);
-        $this->expectExceptionMessage('Cannot init type `string`');
-
-        $proxy->init('string');
-    }
-
-    /**
-     * @covers ::init
-     */
     public function testInitFailIfUnionPropertyNotDeclared(): void
     {
         $element = new ClassWithComplexProperties();

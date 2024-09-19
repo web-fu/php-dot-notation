@@ -77,7 +77,10 @@ final class Dot
 
         $newPath = implode($this->separator, $pathTracks);
 
-        return $next->set($newPath, $value);
+        $next->set($newPath, $value);
+        $this->proxy->set($track, $newElement);
+
+        return $this;
     }
 
     public function has(string $path): bool
@@ -147,15 +150,43 @@ final class Dot
             $this->proxy->init($track);
         }
 
-        $newElement = $this->proxy->get($track);
+        $nextElement = $this->proxy->get($track);
 
-        assert(is_array($newElement) || is_object($newElement));
+        assert(is_array($nextElement) || is_object($nextElement));
 
-        $next = new self($newElement);
+        $nextDot = new self($nextElement);
 
-        $newPath = implode($this->separator, $pathTracks);
+        $nextPath = implode($this->separator, $pathTracks);
 
-        return $next->init($newPath, $type);
+        return $nextDot->init($nextPath, $type);
+    }
+
+    public function create(string $path, string|null $type = null): self
+    {
+        $pathTracks = explode($this->separator, $path);
+
+        $track = array_shift($pathTracks);
+
+        if (!count($pathTracks)) {
+            $this->proxy->create($track, $type);
+
+            return $this;
+        }
+
+        if (!$this->proxy->has($track)) {
+            $this->proxy->create($track, 'array');
+        }
+
+        $nextElement = $this->proxy->get($track);
+
+        $nextDot = new self($nextElement);
+
+        $nextPath = implode($this->separator, $pathTracks);
+        $nextDot->create($nextPath, $type);
+
+        $this->proxy->set($track, $nextElement);
+
+        return $this;
     }
 
     public function unset(string $path): self
@@ -242,23 +273,12 @@ final class Dot
     public static function undotify(array $dotified, string $separator = '.'): array
     {
         $result = [];
+        $dot    = new self($result, $separator);
+
         foreach ($dotified as $path => $value) {
-            // extract keys
-            $keys = explode($separator, $path);
-            // reverse keys for assignments
-            $keys = array_reverse($keys);
-
-            // set initial value
-            $lastVal = $value;
-            foreach ($keys as $key) {
-                // wrap value with key over each iteration
-                $lastVal = [
-                    $key => $lastVal,
-                ];
-            }
-
-            // merge result
-            $result = array_merge_recursive($result, $lastVal);
+            $dot
+                ->create($path)
+                ->set($path, $value);
         }
 
         return $result;
