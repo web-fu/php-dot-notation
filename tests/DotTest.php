@@ -626,8 +626,8 @@ class DotTest extends TestCase
      */
     public function testInitDoesNotChangeIfAlreadyInitialized(): void
     {
-        $element = [new ClassWithComplexProperties()];
-        $element[0]->simple = new SimpleClass();
+        $element                    = [new ClassWithComplexProperties()];
+        $element[0]->simple         = new SimpleClass();
         $element[0]->simple->public = 'test';
 
         $dot = new Dot($element);
