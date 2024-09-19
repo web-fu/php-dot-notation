@@ -23,10 +23,11 @@ $test = new class {
 };
 
 $dot = new Dot($test);
-var_dump($dot->isInitialised('propertyInitialized')); // true
+var_dump($dot->isInitialised('propertyInitialized')); // bool(true)
 echo PHP_EOL;
 
-var_dump($dot->isInitialised('propertyNotInitialized')); // false
+var_dump($dot->isInitialised('propertyNotInitialized')); // bool(false)
+echo PHP_EOL;
 
 // Initializing a property or a value in an array
 $test = new class {
@@ -36,7 +37,15 @@ $test = new class {
 $dot = new Dot($test);
 $dot->init('array');
 
-var_dump($test->array); // []
+var_dump($test->array); // array(0) {}
+echo PHP_EOL;
+
+// Creating a property or a value in an array
+$array = [];
+$dot   = new Dot($array);
+$dot->create('foo.bar', 'string');
+
+var_dump($array['foo']['bar']); // string(0) ""
 echo PHP_EOL;
 
 // Unsetting a value in an array or an object
@@ -49,4 +58,4 @@ $test = new class {
 $dot = new Dot($test);
 $dot->unset('array.foo');
 
-var_dump(array_key_exists('foo', $test->array)); // false
+var_dump(array_key_exists('foo', $test->array)); // bool(false)

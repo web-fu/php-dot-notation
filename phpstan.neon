@@ -7,4 +7,3 @@ parameters:
         - tests
     excludePaths:
         - tests/TestData
-    checkGenericClassInNonGenericObjectType: false

@@ -6,9 +6,11 @@ PHP Dot Notation
 ![Static analysis status](https://github.com/web-fu/php-dot-notation/actions/workflows/static-analysis.yml/badge.svg)
 ![Code style status](https://github.com/web-fu/php-dot-notation/actions/workflows/code-style.yaml/badge.svg)
 
-### A library that allows to access objects and arrays
+### A library that allows to access objects and arrays using Dot Notation
 
-Library that allows to access array and object with strong type support using Javascript-like Dot Notation
+This library allows to access objects and arrays using dot notation. 
+
+It also allows getting, setting, and creation of objects and arrays using dot notation.
 
 ## Installation
 ```bash
@@ -49,6 +51,40 @@ echo $dot->get('method()'); //foo
 $dot->set('property', 'baz');
 echo $class->property; //baz
 ```
+
+## Init, creating and unsetting paths
+```php
+$class = new class() {
+    public string $property;
+}
+
+$dot = new Dot($class);
+$dot->init('property');
+
+var_dump($class->property);  //string[0] ""
+
+$array = [];
+$dot = new Dot($array);
+$dot->create('foo.bar');
+
+var_dump(['foo']['bar']); //NULL    
+
+// Unsetting a value in an array or an object
+$test = new class {
+    public array $array = [
+        'foo' => 'bar',
+    ];
+};
+
+$dot = new Dot($test);
+$dot->unset('array.foo');
+
+var_dump(array_key_exists('foo', $test->array)); // false
+```
+
+> **Note**: The `init` method check if the path exits before trying to initialize it. 
+> 
+> The `create` method creates the path if it does not exist, if possible.
 
 ## Converting from and to Dot Notation
 ```php
@@ -113,6 +149,16 @@ $class = new class() {
 
 $dot = new Dot($class);
 echo $dot->get('iDoSomething'); // I Do Something 0
+```
+
+### It's not possible to access private or protected properties
+```php
+$class = new class() {
+    private string $property = 'test';
+}
+
+$dot = new Dot($class);
+echo $dot->get('property'); //Unhandled Exception: WebFu\DotNotation\Exception\PathNotFoundException Path `property` not found
 ```
 
 ### It's not possible to discern if a method returns NULL or does not return at all

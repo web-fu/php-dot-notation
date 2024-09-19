@@ -14,11 +14,14 @@ declare(strict_types=1);
 namespace WebFu\DotNotation\Tests\Proxy;
 
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\DotNotation\Proxy\ClassProxy;
 use WebFu\DotNotation\Tests\TestData\ChildClass;
+use WebFu\DotNotation\Tests\TestData\ClassWithAllowDynamicProperties;
 use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
+use WebFu\DotNotation\Tests\TestData\ClassWithMagicMethods;
 use WebFu\DotNotation\Tests\TestData\SimpleClass;
 use WebFu\Reflection\ReflectionType;
 
@@ -171,9 +174,28 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::get
      */
-    public function testGetFailIfKeyDoNotExists(): void
+    public function testGetFailsIfKeyDoNotExists(): void
     {
         $element = new class {
+        };
+
+        $this->expectException(PathNotFoundException::class);
+        $this->expectExceptionMessage('Key `property` not found');
+
+        $proxy = new ClassProxy($element);
+        $proxy->get('property');
+    }
+
+    /**
+     * @covers ::get
+     */
+    public function testGetFailsIfKeyIsPrivate(): void
+    {
+        $element = new class {
+            /**
+             * @phpstan-ignore-next-line
+             */
+            private string $property = 'foo';
         };
 
         $this->expectException(PathNotFoundException::class);
@@ -201,7 +223,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::set
      */
-    public function testSetFailIfKeyDoNotExists(): void
+    public function testSetFailsIfKeyDoNotExists(): void
     {
         $element = new class {
         };
@@ -216,7 +238,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::set
      */
-    public function testSetFailIfKeyIsMethod(): void
+    public function testSetFailsIfKeyIsMethod(): void
     {
         $element = new class {
             public function method(): void
@@ -257,7 +279,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::isInitialised
      */
-    public function testIsInitialisedFailIfNoKey(): void
+    public function testIsInitialisedFailsIfNoKey(): void
     {
         $element = new class {
         };
@@ -319,7 +341,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::init
      */
-    public function testInitFailIfNoKeyFound(): void
+    public function testInitFailsIfNoKeyFound(): void
     {
         $element = new class {
         };
@@ -335,7 +357,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::init
      */
-    public function testInitFailIfTryToInitialiseMethod(): void
+    public function testInitFailsIfTryToInitialiseMethod(): void
     {
         $element = new class {
             public function method(): void
@@ -354,24 +376,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::init
      */
-    public function testInitFailIfScalarProperty(): void
-    {
-        $element = new class {
-            public string $string;
-        };
-
-        $proxy = new ClassProxy($element);
-
-        $this->expectException(UnsupportedOperationException::class);
-        $this->expectExceptionMessage('Cannot init type `string`');
-
-        $proxy->init('string');
-    }
-
-    /**
-     * @covers ::init
-     */
-    public function testInitFailIfUnionPropertyNotDeclared(): void
+    public function testInitFailsIfUnionPropertyNotDeclared(): void
     {
         $element = new ClassWithComplexProperties();
 
@@ -381,6 +386,70 @@ class ClassProxyTest extends TestCase
         $this->expectExceptionMessage('In case of union type you must specify the type');
 
         $proxy->init('union');
+    }
+
+    /**
+     * @covers ::create
+     *
+     * @dataProvider classWithDynamicPropertiesProvider
+     */
+    public function testCreate(object $element): void
+    {
+        $proxy = new ClassProxy($element);
+        $proxy->create('foo', SimpleClass::class);
+
+        $this->assertInstanceOf(SimpleClass::class, $element->foo);
+    }
+
+    /**
+     * @return iterable<array{element: object}>
+     */
+    public function classWithDynamicPropertiesProvider(): iterable
+    {
+        yield 'stdClass' => [
+            'element' => new stdClass(),
+        ];
+        yield 'classAllowDynamicProperties' => [
+            'element' => new ClassWithAllowDynamicProperties(),
+        ];
+        yield 'classWithMagicMethods' => [
+            'element' => new ClassWithMagicMethods(),
+        ];
+    }
+
+    /**
+     * @covers ::create
+     */
+    public function testCreateChangesNothingIfPropertyAlreadyExists(): void
+    {
+        $element              = new stdClass();
+        $element->foo         = new SimpleClass();
+        $element->foo->public = 'test';
+
+        $proxy = new ClassProxy($element);
+
+        $proxy->create('foo', SimpleClass::class);
+
+        $expected              = new stdClass();
+        $expected->foo         = new SimpleClass();
+        $expected->foo->public = 'test';
+
+        $this->assertEquals($expected, $element);
+    }
+
+    /**
+     * @covers ::create
+     */
+    public function testCreateFailsIfNoDynamicPropertiesAllowed(): void
+    {
+        $element = new SimpleClass();
+
+        $proxy = new ClassProxy($element);
+
+        $this->expectException(UnsupportedOperationException::class);
+        $this->expectExceptionMessage('Cannot create a new property');
+
+        $proxy->create('foo', SimpleClass::class);
     }
 
     /**
@@ -416,7 +485,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::unset
      */
-    public function testUnsetFailIfKeyIsMethod(): void
+    public function testUnsetFailsIfKeyIsMethod(): void
     {
         $element = new class {
             public function method(): void
@@ -456,7 +525,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::getReflectionType
      */
-    public function testGetReflectionTypeFailIfKeyDoNotExists(): void
+    public function testGetReflectionTypeFailsIfKeyDoNotExists(): void
     {
         $element = new class {
         };

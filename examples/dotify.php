@@ -23,8 +23,10 @@ $array = [
 ];
 $dotified = Dot::dotify($array);
 
-echo $dotified['foo.bar'].PHP_EOL; // test
+echo $dotified['foo.bar']; // test
+echo PHP_EOL;
 
-$array = Dot::undotify($dotified);
+// Turning a dotified array into a normal array
+$normal = Dot::undotify($dotified);
 
-var_dump($array);
+echo $normal['foo']['bar']; // test

@@ -23,11 +23,13 @@ $array = [
 
 // Accessing an array
 $dot = new Dot($array);
-echo $dot->get('foo.bar').PHP_EOL; // test
+echo $dot->get('foo.bar'); // test
+echo PHP_EOL;
 
 // Setting a value in an array
 $dot->set('foo.bar', 'baz');
-echo $array['foo']['bar'].PHP_EOL; // baz
+echo $array['foo']['bar']; // baz
+echo PHP_EOL;
 
 $class = new class {
     public string $property = 'test';
@@ -40,8 +42,10 @@ $class = new class {
 
 // Accessing an object
 $dot = new Dot($class);
-echo $dot->get('property').PHP_EOL; // test
-echo $dot->get('method()').PHP_EOL; // foo
+echo $dot->get('property'); // test
+echo PHP_EOL;
+echo $dot->get('method()'); // foo
+echo PHP_EOL;
 
 // Setting a value in an object
 $dot->set('property', 'baz');
@@ -65,7 +69,9 @@ $test = new class {
 };
 
 $dot = new Dot($test);
-echo $dot->get('objectList.0.string').PHP_EOL; // test
+echo $dot->get('objectList.0.string'); // test
+echo PHP_EOL;
 
 $dot->set('objectList.0.string', 'test2');
-echo $test->objectList[0]->string.PHP_EOL; // test2
+echo $test->objectList[0]->string; // test2
+echo PHP_EOL;

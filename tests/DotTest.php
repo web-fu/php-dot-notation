@@ -16,10 +16,12 @@ namespace WebFu\DotNotation\Tests;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use WebFu\DotNotation\Dot;
-use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
+use WebFu\DotNotation\Tests\TestData\ChildClass;
 use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
 use WebFu\DotNotation\Tests\TestData\SimpleClass;
+use WebFu\Reflection\ReflectionClass;
+use WebFu\Reflection\ReflectionProperty;
 use WebFu\Reflection\ReflectionType;
 
 /**
@@ -145,16 +147,31 @@ class DotTest extends TestCase
 
     /**
      * @covers ::get
+     *
+     * @dataProvider invalidPathProvider
      */
-    public function testGetPathNotFound(): void
+    public function testGetPathNotFound(string $path): void
     {
-        $element = ['exists' => 1];
+        $element = new ChildClass();
         $dot     = new Dot($element);
 
         $this->expectException(PathNotFoundException::class);
-        $this->expectExceptionMessage('Path `notExists` not found');
+        $this->expectExceptionMessage('Path `'.$path.'` not found');
 
-        $dot->get('notExists');
+        $dot->get($path);
+    }
+
+    /**
+     * @return iterable<array{path: string}>
+     */
+    public function invalidPathProvider(): iterable
+    {
+        yield 'not_exits' => [
+            'path' => 'notExists',
+        ];
+        yield 'private' => [
+            'path' => 'private',
+        ];
     }
 
     /**
@@ -446,7 +463,10 @@ class DotTest extends TestCase
         ];
     }
 
-    public function testHasFails(): void
+    /**
+     * @covers ::has
+     */
+    public function testHasNot(): void
     {
         $element = new class {
             public string $scalar = 'scalar';
@@ -454,10 +474,7 @@ class DotTest extends TestCase
 
         $dot = new Dot($element);
 
-        $this->expectException(InvalidPathException::class);
-        $this->expectExceptionMessage('Element of type `string` has no child elements');
-
-        $dot->has('scalar.invalid');
+        $this->assertFalse($dot->has('scalar.invalid'));
     }
 
     /**
@@ -553,6 +570,9 @@ class DotTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::isInitialised
+     */
     public function testIsInitializedFalse(): void
     {
         $element = new ClassWithComplexProperties();
@@ -561,6 +581,37 @@ class DotTest extends TestCase
         $this->assertFalse($dot->isInitialised('simple'));
     }
 
+    /**
+     * @param mixed[]|object $element
+     *
+     * @dataProvider elementWithoutPathProvider
+     */
+    public function testIsInitializedFailsIfPathNotFound(array|object $element): void
+    {
+        $dot = new Dot($element);
+
+        $this->expectException(PathNotFoundException::class);
+        $this->expectExceptionMessage('Path `foo.bar` not found');
+
+        $dot->isInitialised('foo.bar');
+    }
+
+    /**
+     * @return iterable<array{element: mixed[]|object}>
+     */
+    public function elementWithoutPathProvider(): iterable
+    {
+        yield 'array' => [
+            'element' => ['foo' => 1],
+        ];
+        yield 'object' => [
+            'element' => (object) ['foo' => 1],
+        ];
+    }
+
+    /**
+     * @covers ::init
+     */
     public function testInit(): void
     {
         $element = [new ClassWithComplexProperties()];
@@ -571,6 +622,59 @@ class DotTest extends TestCase
         $this->assertInstanceOf(SimpleClass::class, $element[0]->simple);
     }
 
+    /**
+     * @covers ::init
+     */
+    public function testInitDoesNotChangeIfAlreadyInitialized(): void
+    {
+        $element                    = [new ClassWithComplexProperties()];
+        $element[0]->simple         = new SimpleClass();
+        $element[0]->simple->public = 'test';
+
+        $dot = new Dot($element);
+        $dot->init('0.simple');
+
+        $this->assertInstanceOf(SimpleClass::class, $element[0]->simple);
+        $this->assertEquals('test', $element[0]->simple->public);
+    }
+
+    /**
+     * @covers ::create
+     *
+     * @param mixed[]|object $element
+     *
+     * @dataProvider elementAndPathProvider
+     */
+    public function testCreate(array|object $element, string $path): void
+    {
+        $dot = new Dot($element);
+        $dot->create($path, 'string');
+
+        $this->assertEquals('', $dot->get($path));
+    }
+
+    /**
+     * @return iterable<array{element: mixed[]|object, path: string}>
+     */
+    public function elementAndPathProvider(): iterable
+    {
+        yield 'array' => [
+            'element' => [],
+            'path'    => 'foo',
+        ];
+        yield 'object' => [
+            'element' => new stdClass(),
+            'path'    => 'foo',
+        ];
+        yield 'array.array' => [
+            'element' => [],
+            'path'    => 'foo.bar',
+        ];
+    }
+
+    /**
+     * @covers ::unset
+     */
     public function testUnset(): void
     {
         $element = ['foo' => 1];
@@ -594,6 +698,9 @@ class DotTest extends TestCase
         $this->assertArrayNotHasKey('foo', $test->array);
     }
 
+    /**
+     * @covers ::unset
+     */
     public function testUnsetDoesNotChangeIfNothingToUnset(): void
     {
         $element = ['foo' => 1];
@@ -603,6 +710,25 @@ class DotTest extends TestCase
         $this->assertEquals(['foo' => 1], $element);
     }
 
+    /**
+     * @covers ::unset
+     */
+    public function testUnsetDoesNotChangeIfNotInitialized(): void
+    {
+        $element = new SimpleClass();
+        $dot     = new Dot($element);
+        $dot->unset('public');
+
+        $reflection         = new ReflectionClass($element);
+        $reflectionProperty = $reflection->getProperty('public');
+
+        $this->assertInstanceof(ReflectionProperty::class, $reflectionProperty);
+        $this->assertFalse($reflectionProperty->isInitialized($element));
+    }
+
+    /**
+     * @covers ::getReflectionType
+     */
     public function testGetReflectionType(): void
     {
         $element = ['foo' => 1];
@@ -666,6 +792,9 @@ class DotTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::undotify
+     */
     public function testUndotify(): void
     {
         $arrayDotified = [
@@ -681,6 +810,30 @@ class DotTest extends TestCase
             'baz' => [
                 'qux'  => 'quux',
                 'quuz' => 'corge',
+            ],
+        ], $array);
+
+        $arrayWithNumericIndex = [
+            'foo'        => 'bar',
+            'baz.0.qux'  => 'quux',
+            'baz.0.quuz' => 'corge',
+            'baz.1.qux'  => 'abc',
+            'baz.1.quuz' => 'def',
+        ];
+
+        $array = Dot::undotify($arrayWithNumericIndex);
+
+        $this->assertEquals([
+            'foo' => 'bar',
+            'baz' => [
+                [
+                    'qux'  => 'quux',
+                    'quuz' => 'corge',
+                ],
+                [
+                    'qux'  => 'abc',
+                    'quuz' => 'def',
+                ],
             ],
         ], $array);
     }
