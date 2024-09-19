@@ -382,6 +382,9 @@ class ClassProxyTest extends TestCase
         $this->assertInstanceOf(SimpleClass::class, $element->foo);
     }
 
+    /**
+     * @return iterable<array{element: object}>
+     */
     public function classWithDynamicPropertiesProvider(): iterable
     {
         yield 'stdClass' => [

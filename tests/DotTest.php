@@ -575,6 +575,9 @@ class DotTest extends TestCase
         $dot->isInitialised('foo.bar');
     }
 
+    /**
+     * @return iterable<array{element: mixed[]|object}>
+     */
     public function elementWithoutPathProvider(): iterable
     {
         yield 'array' => [
@@ -601,6 +604,8 @@ class DotTest extends TestCase
     /**
      * @covers ::create
      *
+     * @param mixed[]|object $element
+     *
      * @dataProvider elementAndPathProvider
      */
     public function testCreate(array|object $element, string $path): void
@@ -611,6 +616,9 @@ class DotTest extends TestCase
         $this->assertEquals('', $dot->get($path));
     }
 
+    /**
+     * @return iterable<array{element: mixed[]|object, path: string}>
+     */
     public function elementAndPathProvider(): iterable
     {
         yield 'array' => [

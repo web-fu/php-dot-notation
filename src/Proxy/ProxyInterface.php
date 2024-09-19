@@ -38,7 +38,7 @@ interface ProxyInterface
     /**
      * Create a new key if possible.
      */
-    public function create(string|int $key): self;
+    public function create(string|int $key, string|null $type = null): self;
 
     public function unset(string|int $key): self;
 
