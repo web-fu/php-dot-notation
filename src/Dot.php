@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace WebFu\DotNotation;
 
-use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Proxy\ProxyFactory;
 use WebFu\DotNotation\Proxy\ProxyInterface;
@@ -90,17 +89,17 @@ final class Dot
             return false;
         }
 
-        $value = $this->proxy->get($track);
-
         if (!count($pathTracks)) {
             return true;
         }
+
+        $value = $this->proxy->get($track);
 
         if (
             !is_array($value)
             && !is_object($value)
         ) {
-            throw new InvalidPathException('Element of type `'.get_debug_type($value).'` has no child elements');
+            return false;
         }
 
         $next = new self($value);
@@ -110,6 +109,10 @@ final class Dot
 
     public function isInitialised(string $path): bool
     {
+        if (!$this->has($path)) {
+            throw new PathNotFoundException('Path `'.$path.'` not found');
+        }
+
         $pathTracks = explode($this->separator, $path);
         $track      = array_shift($pathTracks);
 
@@ -121,13 +124,6 @@ final class Dot
 
         if (!count($pathTracks)) {
             return true;
-        }
-
-        if (
-            !is_array($value)
-            && !is_object($value)
-        ) {
-            return false;
         }
 
         $next = new self($value);

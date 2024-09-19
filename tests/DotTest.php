@@ -16,7 +16,6 @@ namespace WebFu\DotNotation\Tests;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use WebFu\DotNotation\Dot;
-use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
 use WebFu\DotNotation\Tests\TestData\SimpleClass;
@@ -446,7 +445,7 @@ class DotTest extends TestCase
         ];
     }
 
-    public function testHasFails(): void
+    public function testHasNot(): void
     {
         $element = new class {
             public string $scalar = 'scalar';
@@ -454,10 +453,7 @@ class DotTest extends TestCase
 
         $dot = new Dot($element);
 
-        $this->expectException(InvalidPathException::class);
-        $this->expectExceptionMessage('Element of type `string` has no child elements');
-
-        $dot->has('scalar.invalid');
+        $this->assertFalse($dot->has('scalar.invalid'));
     }
 
     /**
@@ -559,6 +555,31 @@ class DotTest extends TestCase
         $dot     = new Dot($element);
 
         $this->assertFalse($dot->isInitialised('simple'));
+    }
+
+    /**
+     * @param mixed[]|object $element
+     *
+     * @dataProvider elementWithoutPathProvider
+     */
+    public function testIsInitializedFailsIfPathNotFound(array|object $element): void
+    {
+        $dot = new Dot($element);
+
+        $this->expectException(PathNotFoundException::class);
+        $this->expectExceptionMessage('Path `foo.bar` not found');
+
+        $dot->isInitialised('foo.bar');
+    }
+
+    public function elementWithoutPathProvider(): iterable
+    {
+        yield 'array' => [
+            'element' => ['foo' => 1],
+        ];
+        yield 'object' => [
+            'element' => (object) ['foo' => 1],
+        ];
     }
 
     public function testInit(): void
