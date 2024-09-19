@@ -718,8 +718,11 @@ class DotTest extends TestCase
         $dot     = new Dot($element);
         $dot->unset('public');
 
-        $reflection = new ReflectionClass($element);
-        $this->assertFalse($reflection->getProperty('public')->isInitialized($element));
+        $reflection         = new ReflectionClass($element);
+        $reflectionProperty = $reflection->getProperty('public');
+
+        $this->assertInstanceof(ReflectionType::class, $reflectionProperty);
+        $this->assertFalse($reflectionProperty->isInitialized($element));
     }
 
     /**

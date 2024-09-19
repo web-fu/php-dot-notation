@@ -192,6 +192,9 @@ class ClassProxyTest extends TestCase
     public function testGetFailsIfKeyIsPrivate(): void
     {
         $element = new class {
+            /**
+             * @phpstan-ignore-next-line
+             */
             private string $property = 'foo';
         };
 
