@@ -17,6 +17,7 @@ use PHPUnit\Framework\TestCase;
 use stdClass;
 use WebFu\DotNotation\Dot;
 use WebFu\DotNotation\Exception\PathNotFoundException;
+use WebFu\DotNotation\Tests\TestData\ChildClass;
 use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
 use WebFu\DotNotation\Tests\TestData\SimpleClass;
 use WebFu\Reflection\ReflectionType;
@@ -144,16 +145,31 @@ class DotTest extends TestCase
 
     /**
      * @covers ::get
+     *
+     * @dataProvider invalidPathProvider
      */
-    public function testGetPathNotFound(): void
+    public function testGetPathNotFound(string $path): void
     {
-        $element = ['exists' => 1];
+        $element = new ChildClass();
         $dot     = new Dot($element);
 
         $this->expectException(PathNotFoundException::class);
-        $this->expectExceptionMessage('Path `notExists` not found');
+        $this->expectExceptionMessage('Path `'.$path.'` not found');
 
-        $dot->get('notExists');
+        $dot->get($path);
+    }
+
+    /**
+     * @return iterable<array{path: string}>
+     */
+    public function invalidPathProvider(): iterable
+    {
+        yield 'not_exits' => [
+            'path' => 'notExists',
+        ];
+        yield 'private' => [
+            'path' => 'private',
+        ];
     }
 
     /**

@@ -187,6 +187,22 @@ class ClassProxyTest extends TestCase
     }
 
     /**
+     * @covers ::get
+     */
+    public function testGetFailsIfKeyIsPrivate(): void
+    {
+        $element = new class {
+            private string $property = 'foo';
+        };
+
+        $this->expectException(PathNotFoundException::class);
+        $this->expectExceptionMessage('Key `property` not found');
+
+        $proxy = new ClassProxy($element);
+        $proxy->get('property');
+    }
+
+    /**
      * @covers ::set
      */
     public function testSet(): void
