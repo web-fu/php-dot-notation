@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace WebFu\DotNotation\Proxy;
 
 use Closure;
-use stdClass;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\Reflection\ReflectionClass;
@@ -24,8 +23,11 @@ use WebFu\Reflection\ReflectionType;
 
 class ClassProxy implements ProxyInterface
 {
+    private ReflectionClass $reflection;
+
     public function __construct(private object &$element)
     {
+        $this->reflection = new ReflectionClass($element);
     }
 
     public function has(int|string $key): bool
@@ -40,7 +42,7 @@ class ClassProxy implements ProxyInterface
     {
         $keys = [];
 
-        $reflection = new ReflectionClass($this->element);
+        $reflection = $this->reflection;
 
         foreach ($reflection->getProperties() as $property) {
             $keys[$property->getName()] = 0;
@@ -74,29 +76,12 @@ class ClassProxy implements ProxyInterface
 
         $key = (string) $key;
 
-        if (str_ends_with($key, '()')) {
-            $method = str_replace('()', '', $key);
+        $isInternal = $this->reflection->isInternal();
 
-            return Closure::bind(
-                static function (object $element) use ($method) {
-                    return $element->{$method}();
-                },
-                null,
-                $this->element,
-            )($this->element);
-        }
-
-        if ($this->element instanceof stdClass) {
-            return $this->element->{$key};
-        }
-
-        return Closure::bind(
-            static function (object $element) use ($key) {
-                return $element->{$key};
-            },
-            null,
-            $this->element,
-        )($this->element);
+        return match (true) {
+            str_ends_with($key, '()') => $this->getMethod($key, $isInternal),
+            default                   => $this->getProperty($key, $isInternal),
+        };
     }
 
     public function set(int|string $key, mixed $value): ProxyInterface
@@ -246,5 +231,35 @@ class ClassProxy implements ProxyInterface
         assert($reflectionProperty instanceof ReflectionProperty);
 
         return $reflectionProperty->getType();
+    }
+
+    private function getMethod(string $key, bool $isInternal): mixed
+    {
+        $method = str_replace('()', '', $key);
+
+        return match (true) {
+            $isInternal => $this->element->{$method}(),
+            default     => Closure::bind(
+                static function (object $element) use ($method) {
+                    return $element->{$method}();
+                },
+                null,
+                $this->element,
+            )($this->element),
+        };
+    }
+
+    private function getProperty(string $key, bool $isInternal): mixed
+    {
+        return match (true) {
+            $isInternal => $this->element->{$key},
+            default     => Closure::bind(
+                static function (object $element) use ($key) {
+                    return $element->{$key};
+                },
+                null,
+                $this->element,
+            )($this->element),
+        };
     }
 }
