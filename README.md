@@ -151,16 +151,6 @@ $dot = new Dot($class);
 echo $dot->get('iDoSomething'); // I Do Something 0
 ```
 
-### It's not possible to access private or protected properties
-```php
-$class = new class() {
-    private string $property = 'test';
-}
-
-$dot = new Dot($class);
-echo $dot->get('property'); //Unhandled Exception: WebFu\DotNotation\Exception\PathNotFoundException Path `property` not found
-```
-
 ### It's not possible to discern if a method returns NULL or does not return at all
 ```php
 $class = new class() {
