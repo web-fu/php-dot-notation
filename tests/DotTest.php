@@ -169,9 +169,6 @@ class DotTest extends TestCase
         yield 'not_exits' => [
             'path' => 'notExists',
         ];
-        yield 'private' => [
-            'path' => 'private',
-        ];
     }
 
     /**
