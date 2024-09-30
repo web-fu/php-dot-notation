@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace WebFu\DotNotation\Proxy;
 
+use Closure;
+use stdClass;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\Reflection\ReflectionClass;
@@ -40,15 +42,28 @@ class ClassProxy implements ProxyInterface
 
         $reflection = new ReflectionClass($this->element);
 
-        foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
-            $keys[] = $property->getName();
+        foreach ($reflection->getProperties() as $property) {
+            $keys[$property->getName()] = 0;
         }
 
-        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-            $keys[] = $method->getName().'()';
+        foreach ($reflection->getMethods() as $method) {
+            $keys[$method->getName().'()'] = 0;
         }
 
-        return $keys;
+        $parent = $reflection->getParentClass();
+        while ($parent instanceof ReflectionClass) {
+            foreach ($parent->getProperties() as $property) {
+                $keys[$property->getName()] = 0;
+            }
+
+            foreach ($parent->getMethods() as $method) {
+                $keys[$method->getName().'()'] = 0;
+            }
+
+            $parent = $parent->getParentClass();
+        }
+
+        return \array_keys($keys);
     }
 
     public function get(int|string $key): mixed
@@ -65,7 +80,17 @@ class ClassProxy implements ProxyInterface
             return $this->element->{$method}();
         }
 
-        return $this->element->{$key};
+        if ($this->element instanceof stdClass) {
+            return $this->element->{$key};
+        }
+
+        return Closure::bind(
+            static function (object $element) use ($key) {
+                return $element->{$key};
+            },
+            null,
+            $this->element,
+        )($this->element);
     }
 
     public function set(int|string $key, mixed $value): ProxyInterface
