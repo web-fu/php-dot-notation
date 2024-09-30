@@ -77,7 +77,13 @@ class ClassProxy implements ProxyInterface
         if (str_ends_with($key, '()')) {
             $method = str_replace('()', '', $key);
 
-            return $this->element->{$method}();
+            return Closure::bind(
+                static function (object $element) use ($method) {
+                    return $element->{$method}();
+                },
+                null,
+                $this->element,
+            )($this->element);
         }
 
         if ($this->element instanceof stdClass) {
