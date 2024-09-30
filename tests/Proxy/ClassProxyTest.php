@@ -42,11 +42,23 @@ class ClassProxyTest extends TestCase
 
         $this->assertEquals([
             'public',
+            'protected',
+            'private',
             'publicParent',
+            'protectedParent',
             'publicTrait',
+            'protectedTrait',
+            'privateTrait',
             'public()',
+            'protected()',
+            'private()',
             'publicParent()',
+            'protectedParent()',
             'publicTrait()',
+            'protectedTrait()',
+            'privateTrait()',
+            'privateParent',
+            'privateParent()',
         ], $proxy->getKeys());
     }
 
@@ -87,7 +99,7 @@ class ClassProxyTest extends TestCase
                 private string $property;
             },
             'key'      => 'property',
-            'expected' => false,
+            'expected' => true,
         ];
         yield 'class.method.exists' => [
             'element' => new class {
@@ -114,7 +126,7 @@ class ClassProxyTest extends TestCase
                 }
             },
             'key'      => 'method()',
-            'expected' => false,
+            'expected' => true,
         ];
     }
 
@@ -128,11 +140,23 @@ class ClassProxyTest extends TestCase
 
         $this->assertSame([
             'public',
+            'protected',
+            'private',
             'publicParent',
+            'protectedParent',
             'publicTrait',
+            'protectedTrait',
+            'privateTrait',
             'public()',
+            'protected()',
+            'private()',
             'publicParent()',
+            'protectedParent()',
             'publicTrait()',
+            'protectedTrait()',
+            'privateTrait()',
+            'privateParent',
+            'privateParent()',
         ], $proxy->getKeys());
     }
 
@@ -189,7 +213,7 @@ class ClassProxyTest extends TestCase
     /**
      * @covers ::get
      */
-    public function testGetFailsIfKeyIsPrivate(): void
+    public function testGetPrivateProperty(): void
     {
         $element = new class {
             /**
@@ -198,11 +222,26 @@ class ClassProxyTest extends TestCase
             private string $property = 'foo';
         };
 
-        $this->expectException(PathNotFoundException::class);
-        $this->expectExceptionMessage('Key `property` not found');
+        $proxy = new ClassProxy($element);
+
+        self::assertSame('foo', $proxy->get('property'));
+    }
+
+    /**
+     * @covers ::get
+     */
+    public function testGetProtectedProperty(): void
+    {
+        $element = new class {
+            /**
+             * @phpstan-ignore-next-line
+             */
+            protected string $property = 'foo';
+        };
 
         $proxy = new ClassProxy($element);
-        $proxy->get('property');
+
+        self::assertSame('foo', $proxy->get('property'));
     }
 
     /**
