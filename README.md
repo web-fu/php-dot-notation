@@ -134,7 +134,7 @@ $indexReflectionType = $dot->getReflectionType('foo.bar')->getTypeNames(); // ['
 
 See `/examples` folder for full examples
 
-## Limitations
+## Limitations And Warnings
 This tool have some limitations: 
 
 ### Getting a method executes the method
@@ -148,20 +148,22 @@ $class = new class() {
 }
 
 $dot = new Dot($class);
-echo $dot->get('iDoSomething'); // I Do Something 0
+echo $dot->get('iDoSomething()'); // I Do Something 0
 ```
 
 ### It's not possible to access private or protected properties
+This is a design decision to avoid breaking encapsulation.
 ```php
 $class = new class() {
     private string $property = 'test';
-}
+};
 
 $dot = new Dot($class);
 echo $dot->get('property'); //Unhandled Exception: WebFu\DotNotation\Exception\PathNotFoundException Path `property` not found
 ```
 
 ### It's not possible to discern if a method returns NULL or does not return at all
+This is a limitation of PHP reflection API
 ```php
 $class = new class() {
     public function thisMethodReturnsNull(): int|null
@@ -172,11 +174,11 @@ $class = new class() {
     {
         //do something
     } 
-}
+};
 
 $dot = new Dot($class);
-var_dump($dot->get('thisMethodReturnsNull')); //NULL
-var_dump($dot->get('thisMethodDoesNotReturn')); //NULL
+var_dump($dot->get('thisMethodReturnsNull()')); //NULL
+var_dump($dot->get('thisMethodDoesNotReturn()')); //NULL
 ```
 
 ### It's not possible setting a method
@@ -185,9 +187,8 @@ $class = new class() {
     public function method(): int {
         return 0;
     }
-}
+};
 
 $dot = new Dot($class);
 $dot->set('method()', 20); //Unhandled Exception: WebFu\Proxy\UnsupportedOperationException Cannot set a class method
-
 ```
