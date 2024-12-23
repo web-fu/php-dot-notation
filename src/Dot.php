@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace WebFu\DotNotation;
 
+use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Proxy\ProxyFactory;
 use WebFu\DotNotation\Proxy\ProxyInterface;
@@ -219,6 +220,20 @@ final class Dot
         return $this;
     }
 
+    public function dot(string $path): static
+    {
+        $result = $this->get($path);
+
+        if (is_array($result) || is_object($result)) {
+            return new self($result);
+        }
+
+        throw new InvalidPathException('Path `'.$path.'` must be an array or an object in order to create a Dot instance');
+    }
+
+    /**
+     * @deprecated v1.7.0
+     */
     public function getReflectionType(string $path): ReflectionType|null
     {
         $pathTracks = explode($this->separator, $path);

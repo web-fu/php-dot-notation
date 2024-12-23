@@ -105,6 +105,8 @@ echo $normal['foo']['bar']; //test
 ```
 
 ## Reflection support
+> getReflectionType method is now deprecated and will be removed in the next major version. Use the reflection library instead.
+
 Reflection support is provided by my reflection library: https://github.com/web-fu/reflection
 
 ```php

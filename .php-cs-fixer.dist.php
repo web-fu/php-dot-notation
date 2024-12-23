@@ -36,7 +36,7 @@ return (new PhpCsFixer\Config())
         'explicit_string_variable'                         => false,
         'self_static_accessor'                             => true,
         'fully_qualified_strict_types'                     => true,
-        'general_phpdoc_annotation_remove'                 => ['annotations'=>['author']],
+        'general_phpdoc_annotation_remove'                 => ['annotations' => ['author']],
         'global_namespace_import'                          => ['import_classes' => true],
         'header_comment'                                   => [
             'comment_type' => 'PHPDoc',
