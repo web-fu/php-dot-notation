@@ -16,6 +16,7 @@ namespace WebFu\DotNotation\Tests;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use WebFu\DotNotation\Dot;
+use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Tests\TestData\ChildClass;
 use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
@@ -724,6 +725,32 @@ class DotTest extends TestCase
 
         $this->assertInstanceof(ReflectionProperty::class, $reflectionProperty);
         $this->assertFalse($reflectionProperty->isInitialized($element));
+    }
+
+    /**
+     * @covers ::dot
+     */
+    public function testDot(): void
+    {
+        $element = ['foo' => ['bar' => 1]];
+        $dot     = new Dot($element);
+        $barDot  = $dot->dot('foo');
+
+        $this->assertEquals(1, $barDot->get('bar'));
+    }
+
+    /**
+     * @covers ::dot
+     */
+    public function testDotFailIfPathIsNotAnArrayOrObject(): void
+    {
+        $element = ['foo' => 1];
+        $dot     = new Dot($element);
+
+        $this->expectException(InvalidPathException::class);
+        $this->expectExceptionMessage('Path `foo` must be an array or an object in order to create a Dot instance');
+
+        $dot->dot('foo');
     }
 
     /**
