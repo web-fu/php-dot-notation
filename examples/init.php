@@ -29,17 +29,6 @@ echo PHP_EOL;
 var_dump($dot->isInitialised('propertyNotInitialized')); // bool(false)
 echo PHP_EOL;
 
-// Initializing a property or a value in an array
-$test = new class {
-    public array $array;
-};
-
-$dot = new Dot($test);
-$dot->init('array');
-
-var_dump($test->array); // array(0) {}
-echo PHP_EOL;
-
 // Creating a property or a value in an array
 $array = [];
 $dot   = new Dot($array);
