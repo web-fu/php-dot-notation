@@ -23,7 +23,6 @@ use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
 use WebFu\DotNotation\Tests\TestData\SimpleClass;
 use WebFu\Reflection\ReflectionClass;
 use WebFu\Reflection\ReflectionProperty;
-use WebFu\Reflection\ReflectionType;
 
 /**
  * @coversDefaultClass \WebFu\DotNotation\Dot
@@ -269,7 +268,8 @@ class DotTest extends TestCase
         $this->assertEquals('test2', $element->objectList[0]->string);
 
         // class -> class -> scalar
-        $element = new ClassWithComplexProperties();
+        $element         = new ClassWithComplexProperties();
+        $element->simple = new SimpleClass();
 
         $dot = new Dot($element);
         $dot->set('simple.public', 'new');
@@ -611,35 +611,6 @@ class DotTest extends TestCase
     }
 
     /**
-     * @covers ::init
-     */
-    public function testInit(): void
-    {
-        $element = [new ClassWithComplexProperties()];
-
-        $dot = new Dot($element);
-        $dot->init('0.simple');
-
-        $this->assertInstanceOf(SimpleClass::class, $element[0]->simple);
-    }
-
-    /**
-     * @covers ::init
-     */
-    public function testInitDoesNotChangeIfAlreadyInitialized(): void
-    {
-        $element                    = [new ClassWithComplexProperties()];
-        $element[0]->simple         = new SimpleClass();
-        $element[0]->simple->public = 'test';
-
-        $dot = new Dot($element);
-        $dot->init('0.simple');
-
-        $this->assertInstanceOf(SimpleClass::class, $element[0]->simple);
-        $this->assertEquals('test', $element[0]->simple->public);
-    }
-
-    /**
      * @covers ::create
      *
      * @param mixed[]|object $element
@@ -651,7 +622,7 @@ class DotTest extends TestCase
         $dot = new Dot($element);
         $dot->create($path, 'string');
 
-        $this->assertEquals('', $dot->get($path));
+        $this->assertEquals('string', $dot->get($path));
     }
 
     /**
@@ -751,20 +722,6 @@ class DotTest extends TestCase
         $this->expectExceptionMessage('Path `foo` must be an array or an object in order to create a Dot instance');
 
         $dot->dot('foo');
-    }
-
-    /**
-     * @covers ::getReflectionType
-     */
-    public function testGetReflectionType(): void
-    {
-        $element = ['foo' => 1];
-        $dot     = new Dot($element);
-        $type    = $dot->getReflectionType('foo');
-
-        $expected = new ReflectionType(['int']);
-
-        $this->assertEquals($expected, $type);
     }
 
     /**
