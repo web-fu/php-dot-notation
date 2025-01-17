@@ -15,10 +15,10 @@ namespace WebFu\DotNotation\Exception;
 
 use Exception;
 
-class InvalidPathException extends Exception
+class PathNotInitialisedException extends Exception
 {
     public function __construct(string $path)
     {
-        parent::__construct('Path `'.$path.'` must be an array or an object in order to create a Dot instance');
+        parent::__construct('Path `'.$path.'` is not initialised');
     }
 }
