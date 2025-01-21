@@ -18,6 +18,7 @@ use stdClass;
 use WebFu\DotNotation\Dot;
 use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
+use WebFu\DotNotation\Exception\PathNotInitialisedException;
 use WebFu\DotNotation\Tests\TestData\ChildClass;
 use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
 use WebFu\DotNotation\Tests\TestData\SimpleClass;
@@ -268,13 +269,27 @@ class DotTest extends TestCase
         $this->assertEquals('test2', $element->objectList[0]->string);
 
         // class -> class -> scalar
-        $element         = new ClassWithComplexProperties();
-        $element->simple = new SimpleClass();
+        $element = new ClassWithComplexProperties();
 
         $dot = new Dot($element);
+        $dot->set('simple', new SimpleClass());
         $dot->set('simple.public', 'new');
 
         $this->assertEquals('new', $element->simple->public);
+    }
+
+    /**
+     * @covers ::set
+     */
+    public function testSetFailsIfPathIsNotInitialised(): void
+    {
+        $element = new ClassWithComplexProperties();
+
+        $this->expectException(PathNotInitialisedException::class);
+        $this->expectExceptionMessage('Path `simple` is not initialised');
+
+        $dot = new Dot($element);
+        $dot->set('simple.public', 'new');
     }
 
     /**
@@ -640,6 +655,10 @@ class DotTest extends TestCase
         ];
         yield 'array.array' => [
             'element' => [],
+            'path'    => 'foo.bar',
+        ];
+        yield 'object.object' => [
+            'element' => new stdClass(),
             'path'    => 'foo.bar',
         ];
     }
