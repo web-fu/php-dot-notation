@@ -15,13 +15,12 @@ namespace WebFu\DotNotation;
 
 use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
-use WebFu\DotNotation\Proxy\ProxyFactory;
-use WebFu\DotNotation\Proxy\ProxyInterface;
-use WebFu\Reflection\ReflectionType;
+use WebFu\DotNotation\Exception\UnsupportedOperationException;
+use WebFu\Proxy\Proxy;
 
 final class Dot
 {
-    private ProxyInterface $proxy;
+    private Proxy $proxy;
 
     /**
      * @param mixed[]|object   $element
@@ -29,9 +28,18 @@ final class Dot
      */
     public function __construct(array|object &$element, private string $separator = '.')
     {
-        $this->proxy = ProxyFactory::create($element);
+        $this->proxy = new Proxy($element);
     }
 
+    /**
+     * Return a value from a path. It fails if the path does not exist.
+     *
+     * @param string $path
+     *
+     * @throws PathNotFoundException
+     *
+     * @return mixed
+     */
     public function get(string $path): mixed
     {
         if (!$this->has($path)) {
@@ -54,9 +62,25 @@ final class Dot
         return $next->get(implode($this->separator, $pathTracks));
     }
 
+    /**
+     * Set a value in a path. It fails if the path does not exist.
+     *
+     * @param string $path
+     * @param mixed  $value
+     *
+     * @throws UnsupportedOperationException
+     *
+     * @return $this
+     */
     public function set(string $path, mixed $value): self
     {
         $pathTracks = explode($this->separator, $path);
+
+        $last = end($pathTracks);
+
+        if (str_ends_with($last, '()')) {
+            throw new UnsupportedOperationException('Cannot set a class method');
+        }
 
         if (1 === count($pathTracks)) {
             $this->proxy->set($pathTracks[0], $value);
@@ -65,10 +89,6 @@ final class Dot
         }
 
         $track = array_shift($pathTracks);
-
-        if (!$this->proxy->isInitialised($track)) {
-            $this->proxy->init($track);
-        }
 
         $newElement = $this->proxy->get($track);
 
@@ -84,6 +104,13 @@ final class Dot
         return $this;
     }
 
+    /**
+     * Check if a path exists.
+     *
+     * @param string $path
+     *
+     * @return bool
+     */
     public function has(string $path): bool
     {
         $pathTracks = explode($this->separator, $path);
@@ -111,6 +138,15 @@ final class Dot
         return $next->has(implode($this->separator, $pathTracks));
     }
 
+    /**
+     * Check if a path is initialised. It fails if the path does not exist.
+     *
+     * @param string $path
+     *
+     * @throws PathNotFoundException
+     *
+     * @return bool
+     */
     public function isInitialised(string $path): bool
     {
         if (!$this->has($path)) {
@@ -135,47 +171,30 @@ final class Dot
         return $next->isInitialised(implode($this->separator, $pathTracks));
     }
 
-    public function init(string $path, string|null $type = null): self
-    {
-        $pathTracks = explode($this->separator, $path);
-
-        if (1 === count($pathTracks)) {
-            $this->proxy->init($pathTracks[0], $type);
-
-            return $this;
-        }
-
-        $track = array_shift($pathTracks);
-
-        if (!$this->proxy->isInitialised($track)) {
-            $this->proxy->init($track);
-        }
-
-        $nextElement = $this->proxy->get($track);
-
-        assert(is_array($nextElement) || is_object($nextElement));
-
-        $nextDot = new self($nextElement);
-
-        $nextPath = implode($this->separator, $pathTracks);
-
-        return $nextDot->init($nextPath, $type);
-    }
-
-    public function create(string $path, string|null $type = null): self
+    /**
+     * Create a path and set a value.
+     *
+     * @param string $path
+     * @param mixed  $value
+     *
+     * @throws UnsupportedOperationException
+     *
+     * @return $this
+     */
+    public function create(string $path, mixed $value): self
     {
         $pathTracks = explode($this->separator, $path);
 
         $track = array_shift($pathTracks);
 
         if (!count($pathTracks)) {
-            $this->proxy->create($track, $type);
+            $this->proxy->create($track, $value);
 
             return $this;
         }
 
         if (!$this->proxy->has($track)) {
-            $this->proxy->create($track, 'array');
+            $this->proxy->create($track, []);
         }
 
         $nextElement = $this->proxy->get($track);
@@ -183,13 +202,20 @@ final class Dot
         $nextDot = new self($nextElement);
 
         $nextPath = implode($this->separator, $pathTracks);
-        $nextDot->create($nextPath, $type);
+        $nextDot->create($nextPath, $value);
 
         $this->proxy->set($track, $nextElement);
 
         return $this;
     }
 
+    /**
+     * Unset a path.
+     *
+     * @param string $path
+     *
+     * @return $this
+     */
     public function unset(string $path): self
     {
         $pathTracks = explode($this->separator, $path);
@@ -220,6 +246,15 @@ final class Dot
         return $this;
     }
 
+    /**
+     * Get a Dot proxy for a path. It fails if the path does not exist.
+     *
+     * @param string $path
+     *
+     * @throws UnsupportedOperationException
+     *
+     * @return Dot
+     */
     public function dot(string $path): static
     {
         $result = $this->get($path);
@@ -232,31 +267,8 @@ final class Dot
     }
 
     /**
-     * @deprecated v1.7.0
-     */
-    public function getReflectionType(string $path): ReflectionType|null
-    {
-        $pathTracks = explode($this->separator, $path);
-        $track      = array_pop($pathTracks);
-
-        $source = $this->proxy;
-
-        if (count($pathTracks)) {
-            $element = $this->get(implode($this->separator, $pathTracks));
-            if (
-                !is_array($element)
-                && !is_object($element)
-            ) {
-                $type = get_debug_type($element);
-                throw new PathNotFoundException('Element of type '.$type.' has no child element');
-            }
-            $source = new self($element);
-        }
-
-        return $source->getReflectionType($track);
-    }
-
-    /**
+     * Serialize an element and return an array in dot notation.
+     *
      * @param mixed[]|object   $element
      * @param non-empty-string $separator
      *
@@ -280,6 +292,8 @@ final class Dot
     }
 
     /**
+     * Unserialize an array in dot notation and return an element.
+     *
      * @param mixed[]          $dotified
      * @param non-empty-string $separator
      *
@@ -292,7 +306,7 @@ final class Dot
 
         foreach ($dotified as $path => $value) {
             $dot
-                ->create($path)
+                ->create($path, [])
                 ->set($path, $value);
         }
 
