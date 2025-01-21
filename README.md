@@ -33,6 +33,7 @@ echo $dot->get('foo.bar'); //test
 $dot->set('foo.bar', 'baz');
 echo $array['foo']['bar']; //baz
 
+// Accessing an object
 $class = new class() {
     public string $property = 'test';
     
@@ -40,9 +41,8 @@ $class = new class() {
     {
         return 'foo';
     }
-}
+};
 
-// Accessing an object
 $dot = new Dot($class);
 echo $dot->get('property'); //test
 echo $dot->get('method()'); //foo
@@ -52,24 +52,23 @@ $dot->set('property', 'baz');
 echo $class->property; //baz
 ```
 
-## Init, creating and unsetting paths
+## Creating a new path
 ```php
-$class = new class() {
-    public string $property;
-}
-
-$dot = new Dot($class);
-$dot->init('property');
-
-var_dump($class->property);  //string[0] ""
-
 $array = [];
 $dot = new Dot($array);
-$dot->create('foo.bar');
+$dot->create('foo.baz', 'test');
+echo $array['foo']['baz']; // test
+echo PHP_EOL; 
 
-var_dump(['foo']['bar']); //NULL    
+$class = new stdClass();
+$dot = new Dot($class);
+$dot->create('foo', 'test');
+echo $class->foo; // test
+echo PHP_EOL; 
+```
 
-// Unsetting a value in an array or an object
+## Unsetting a value in an array or an object
+```php
 $test = new class {
     public array $array = [
         'foo' => 'bar',
@@ -104,36 +103,6 @@ $normal = Dot::undotify($dotified);
 echo $normal['foo']['bar']; //test
 ```
 
-## Reflection support
-> getReflectionType method is now deprecated and will be removed in the next major version. Use the reflection library instead.
-
-Reflection support is provided by my reflection library: https://github.com/web-fu/reflection
-
-```php
-$class = new class() {
-    public string $property = 'test';
-    
-    public function method(): string
-    {
-        return 'foo';
-    }
-};
-
-$dot = new Dot($class);
-
-$propertyReflectionType = $dot->getReflectionType('property')->getTypeNames(); // ['string']
-$methodReturnReflectionType = $dot->getReflectionType('method()')->getTypeNames(); // ['string']
-
-$array = [
-    'foo' => [
-        'bar' => 'test',
-    ],
-];
-
-$dot = new Dot($array);
-$indexReflectionType = $dot->getReflectionType('foo.bar')->getTypeNames(); // ['string']
-```
-
 See `/examples` folder for full examples
 
 ## Limitations And Warnings
@@ -165,7 +134,7 @@ echo $dot->get('property'); //Unhandled Exception: WebFu\DotNotation\Exception\P
 ```
 
 ### It's not possible to discern if a method returns NULL or does not return at all
-This is a limitation of PHP reflection API
+This is a limitation of PHP
 ```php
 $class = new class() {
     public function thisMethodReturnsNull(): int|null
