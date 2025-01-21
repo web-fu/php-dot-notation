@@ -1,7 +1,6 @@
 /.* export-ignore
+/examples export-ignore
 /tests export-ignore
-/phpbench.json.dist export-ignore
-/phpcs.xml.dist export-ignore
+/php-cs.fixer.dist.php export-ignore
 /phpstan.neon export-ignore
 /phpunit.xml.dist export-ignore
-/psalm.xml export-ignore

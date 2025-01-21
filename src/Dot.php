@@ -15,6 +15,7 @@ namespace WebFu\DotNotation;
 
 use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
+use WebFu\DotNotation\Exception\PathNotInitialisedException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\Proxy\Proxy;
 
@@ -43,7 +44,7 @@ final class Dot
     public function get(string $path): mixed
     {
         if (!$this->has($path)) {
-            throw new PathNotFoundException('Path `'.$path.'` not found');
+            throw new PathNotFoundException($path);
         }
 
         $pathTracks = explode($this->separator, $path);
@@ -69,6 +70,7 @@ final class Dot
      * @param mixed  $value
      *
      * @throws UnsupportedOperationException
+     * @throws PathNotInitialisedException
      *
      * @return $this
      */
@@ -89,6 +91,9 @@ final class Dot
         }
 
         $track = array_shift($pathTracks);
+        if (!$this->proxy->isInitialised($track)) {
+            throw new PathNotInitialisedException($track);
+        }
 
         $newElement = $this->proxy->get($track);
 
@@ -150,7 +155,7 @@ final class Dot
     public function isInitialised(string $path): bool
     {
         if (!$this->has($path)) {
-            throw new PathNotFoundException('Path `'.$path.'` not found');
+            throw new PathNotFoundException($path);
         }
 
         $pathTracks = explode($this->separator, $path);
@@ -251,7 +256,7 @@ final class Dot
      *
      * @param string $path
      *
-     * @throws UnsupportedOperationException
+     * @throws InvalidPathException|PathNotFoundException
      *
      * @return Dot
      */
@@ -263,7 +268,7 @@ final class Dot
             return new self($result);
         }
 
-        throw new InvalidPathException('Path `'.$path.'` must be an array or an object in order to create a Dot instance');
+        throw new InvalidPathException($path);
     }
 
     /**

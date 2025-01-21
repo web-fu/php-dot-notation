@@ -31,8 +31,23 @@ $dot->set('foo.bar', 'baz');
 echo $array['foo']['bar']; // baz
 echo PHP_EOL;
 
+// Accessing an object
 $class = new class {
     public string $property = 'test';
+
+    public object $object;
+
+    public function __construct()
+    {
+        $this->object = new class {
+            public string $innerProperty = 'inner-test';
+
+            public function method(): string
+            {
+                return 'inner-foo';
+            }
+        };
+    }
 
     public function method(): string
     {
@@ -40,38 +55,35 @@ $class = new class {
     }
 };
 
-// Accessing an object
 $dot = new Dot($class);
 echo $dot->get('property'); // test
 echo PHP_EOL;
 echo $dot->get('method()'); // foo
 echo PHP_EOL;
+echo $dot->get('object.innerProperty'); // inner-test
+echo PHP_EOL;
+echo $dot->get('object.method()'); // inner-foo
+echo PHP_EOL;
 
 // Setting a value in an object
 $dot->set('property', 'baz');
-echo $class->property.PHP_EOL; // baz
-
-// Accessing a value in object in an array in a object
-$test = new class {
-    /**
-     * @var object[]
-     */
-    public array $objectList;
-
-    public function __construct()
-    {
-        $this->objectList = [
-            new class {
-                public string $string = 'test';
-            },
-        ];
-    }
-};
-
-$dot = new Dot($test);
-echo $dot->get('objectList.0.string'); // test
+echo $class->property; // baz
 echo PHP_EOL;
 
-$dot->set('objectList.0.string', 'test2');
-echo $test->objectList[0]->string; // test2
+$dot->set('object.innerProperty', 'inner-baz');
+echo $class->object->innerProperty; // inner-baz
+echo PHP_EOL;
+
+// Creating a new path for an array
+$array = [];
+$dot   = new Dot($array);
+$dot->create('foo.baz', 'test');
+echo $array['foo']['baz']; // test
+echo PHP_EOL;
+
+// Creating a new path for an object
+$class = new stdClass();
+$dot   = new Dot($class);
+$dot->create('foo.baz', 'test');
+echo $class->foo['baz']; // test
 echo PHP_EOL;
