@@ -749,16 +749,13 @@ class DotTest extends TestCase
      * @dataProvider elementProvider
      *
      * @param mixed[]|object $element
+     * @param mixed[]        $expected
      */
-    public function testDotify(array|object $element): void
+    public function testDotify(array|object $element, array $expected): void
     {
-        $arrayDotified = Dot::dotify($element);
+        $actual = Dot::dotify($element);
 
-        $this->assertEquals([
-            'foo'      => 'bar',
-            'baz.qux'  => 'quux',
-            'baz.quuz' => 'corge',
-        ], $arrayDotified);
+        $this->assertEquals($expected, $actual);
     }
 
     /**
@@ -774,6 +771,11 @@ class DotTest extends TestCase
                     'quuz' => 'corge',
                 ],
             ],
+            'expected' => [
+                'foo'      => 'bar',
+                'baz.qux'  => 'quux',
+                'baz.quuz' => 'corge',
+            ],
         ];
         yield 'object' => [
             'element' => (object) [
@@ -783,6 +785,11 @@ class DotTest extends TestCase
                     'quuz' => 'corge',
                 ],
             ],
+            'expected' => [
+                'foo'      => 'bar',
+                'baz.qux'  => 'quux',
+                'baz.quuz' => 'corge',
+            ],
         ];
         yield 'array_and_object' => [
             'element' => [
@@ -791,6 +798,17 @@ class DotTest extends TestCase
                     'qux'  => 'quux',
                     'quuz' => 'corge',
                 ],
+            ],
+            'expected' => [
+                'foo'      => 'bar',
+                'baz.qux'  => 'quux',
+                'baz.quuz' => 'corge',
+            ],
+        ];
+        yield 'simpleClass' => [
+            'element' => new SimpleClass(),
+            'expected' => [
+
             ],
         ];
     }
@@ -839,5 +857,19 @@ class DotTest extends TestCase
                 ],
             ],
         ], $array);
+    }
+
+    public function testGarbageCollector(): void
+    {
+        $element = ['foo' => ['bar' => 1]];
+
+        $dot     = new Dot($element);
+
+        $this->expectNotToPerformAssertions();
+
+        $class =new stdClass();
+        $func = fn () => $class;
+
+        $element = $func();
     }
 }

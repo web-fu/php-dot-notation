@@ -285,6 +285,9 @@ final class Dot
         $keys   = $dot->proxy->getKeys();
         $result = [];
         foreach ($keys as $key) {
+            if (!$dot->isInitialised((string) $key)) {
+                continue;
+            }
             $value = $dot->get((string) $key);
             if (is_array($value) || is_object($value)) {
                 $result = array_merge($result, self::dotify($value, $prefix.$key.$separator));
