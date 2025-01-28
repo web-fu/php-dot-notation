@@ -806,9 +806,8 @@ class DotTest extends TestCase
             ],
         ];
         yield 'simpleClass' => [
-            'element' => new SimpleClass(),
+            'element'  => new SimpleClass(),
             'expected' => [
-
             ],
         ];
     }
@@ -863,12 +862,12 @@ class DotTest extends TestCase
     {
         $element = ['foo' => ['bar' => 1]];
 
-        $dot     = new Dot($element);
+        $dot = new Dot($element);
 
         $this->expectNotToPerformAssertions();
 
-        $class =new stdClass();
-        $func = fn () => $class;
+        $class = new stdClass();
+        $func  = fn () => $class;
 
         $element = $func();
     }
