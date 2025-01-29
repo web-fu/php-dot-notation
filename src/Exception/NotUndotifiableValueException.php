@@ -17,7 +17,7 @@ use UnexpectedValueException;
 
 class NotUndotifiableValueException extends UnexpectedValueException
 {
-    public function __construct($value)
+    public function __construct(mixed $value)
     {
         parent::__construct(sprintf('Value of type %s cannot be undotified', gettype($value)));
     }

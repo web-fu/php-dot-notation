@@ -22,7 +22,6 @@ use WebFu\Proxy\Proxy;
 class Dot
 {
     private Proxy $proxy;
-    private int $position = 0;
 
     /**
      * @param mixed[]|object   $element
@@ -261,7 +260,7 @@ class Dot
      *
      * @return Dot
      */
-    public function dot(string $path): static
+    public function dot(string $path): self
     {
         $result = $this->get($path);
 
@@ -295,7 +294,7 @@ class Dot
                     $paths[] = $key.$this->separator.$nextPath;
                 }
             } else {
-                $paths[] = $key;
+                $paths[] = (string) $key;
             }
 
             unset($value);

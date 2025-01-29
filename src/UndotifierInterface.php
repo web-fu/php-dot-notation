@@ -18,10 +18,10 @@ interface UndotifierInterface
     /**
      * Denormalize a dot notation array to a normal array or object.
      *
-     * @param array|object $data      Data to restore
-     * @param string       $type      Type of the data to restore
-     * @param string       $separator Separator to use for dot notation
-     * @param array        $context   Context options for the normalization
+     * @param mixed[]|object   $data      Data to restore
+     * @param string           $type      Type of the data to restore
+     * @param non-empty-string $separator Separator to use for dot notation
+     * @param mixed[]          $context   Context options for the normalization
      *
      * @return mixed
      */
@@ -30,9 +30,9 @@ interface UndotifierInterface
     /**
      * Check if the data can be undotified.
      *
-     * @param mixed  $data    Data to check
-     * @param string $type    Type of the data to check
-     * @param array  $context Context options for the normalization
+     * @param mixed   $data    Data to check
+     * @param string  $type    Type of the data to check
+     * @param mixed[] $context Context options for the normalization
      *
      * @return bool
      */

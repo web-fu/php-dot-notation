@@ -53,6 +53,8 @@ class DefaultDotifier implements DotifierInterface, UndotifierInterface
             throw new NotUndotifiableValueException($data);
         }
 
+        assert(is_iterable($data));
+
         $result = [];
         $dot    = new Dot($result, $separator);
 
