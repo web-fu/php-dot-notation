@@ -17,6 +17,6 @@ class ClassWithComplexProperties
 {
     public SimpleClass $simple;
     public ChildClass|SimpleClass $union;
-    public ?SimpleClass $nullable;
+    public SimpleClass|null $nullable;
     public array $array;
 }
