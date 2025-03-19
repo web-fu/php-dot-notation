@@ -318,6 +318,9 @@ class ClassProxyTest extends TestCase
         $proxy->init('union', SimpleClass::class);
 
         $this->assertInstanceOf(SimpleClass::class, $element->union);
+
+        $proxy->init('nullable');
+        $this->assertInstanceOf(SimpleClass::class, $element->nullable);
     }
 
     /**
