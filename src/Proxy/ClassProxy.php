@@ -129,14 +129,17 @@ class ClassProxy implements ProxyInterface
         /** @var ReflectionType $reflectionType */
         $reflectionType = $this->getReflectionType($key);
 
+        $types = $reflectionType->getTypeNames();
+        $types = array_diff($types, ['null']);
+
         if (
-            count($reflectionType->getTypeNames()) > 1
+            count($types) > 1
             && null === $type
         ) {
             throw new UnsupportedOperationException('In case of union type you must specify the type');
         }
 
-        $type ??= $reflectionType->getTypeNames()[0];
+        $type ??= $types[0];
 
         $this->element->{$key} = ValueInitializer::init($type);
 
