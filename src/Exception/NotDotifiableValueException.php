@@ -13,12 +13,13 @@ declare(strict_types=1);
 
 namespace WebFu\DotNotation\Exception;
 
+use Throwable;
 use UnexpectedValueException;
 
 class NotDotifiableValueException extends UnexpectedValueException
 {
-    public function __construct(mixed $value)
+    public function __construct(mixed $value, int $code = 0, Throwable|null $previous = null)
     {
-        parent::__construct(sprintf('Value of type %s cannot be dotified', gettype($value)));
+        parent::__construct(sprintf('Value of type %s cannot be dotified', gettype($value)), $code, $previous);
     }
 }

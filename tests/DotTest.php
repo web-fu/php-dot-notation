@@ -738,7 +738,7 @@ class DotTest extends TestCase
         $dot     = new Dot($element);
 
         $this->expectException(InvalidPathException::class);
-        $this->expectExceptionMessage('Path `foo` must be an array or an object in order to create a Dot instance');
+        $this->expectExceptionMessage('Path `foo` must be an array or an object');
 
         $dot->dot('foo');
     }

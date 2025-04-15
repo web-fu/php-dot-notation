@@ -14,11 +14,12 @@ declare(strict_types=1);
 namespace WebFu\DotNotation\Exception;
 
 use Exception;
+use Throwable;
 
 class PathNotFoundException extends Exception
 {
-    public function __construct(string $path)
+    public function __construct(string $path, int $code = 0, Throwable|null $previous = null)
     {
-        parent::__construct('Path `'.$path.'` not found');
+        parent::__construct(sprintf('Path `%s` not found', $path), $code, $previous);
     }
 }
