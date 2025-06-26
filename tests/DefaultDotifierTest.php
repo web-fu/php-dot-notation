@@ -167,5 +167,32 @@ class DefaultDotifierTest extends TestCase
                 ],
             ],
         ], $array);
+
+        $arraySimpleClass = [
+            'public' => 'test',
+        ];
+
+        $expectedObject         = new SimpleClass();
+        $expectedObject->public = 'test';
+
+        $actualObject = $undotifier->undotify($arraySimpleClass, SimpleClass::class);
+
+        $this->assertEquals($expectedObject, $actualObject);
+
+        $iterable = function (): iterable {
+            yield 'foo' => 'bar';
+            yield 'baz.qux' => 'quux';
+            yield 'baz.quuz' => 'corge';
+        };
+
+        $array = $undotifier->undotify($iterable());
+
+        $this->assertEquals([
+            'foo' => 'bar',
+            'baz' => [
+                'qux'  => 'quux',
+                'quuz' => 'corge',
+            ],
+        ], $array);
     }
 }

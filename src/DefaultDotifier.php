@@ -16,6 +16,8 @@ namespace WebFu\DotNotation;
 use JsonSerializable;
 use WebFu\DotNotation\Exception\NotDotifiableValueException;
 use WebFu\DotNotation\Exception\NotUndotifiableValueException;
+use WebFu\DotNotation\Exception\UnsupportedOperationException;
+use WebFu\Reflection\ReflectionClass;
 
 class DefaultDotifier implements DotifierInterface, UndotifierInterface
 {
@@ -47,33 +49,53 @@ class DefaultDotifier implements DotifierInterface, UndotifierInterface
     /**
      * {@inheritDoc}
      */
-    public function undotify(mixed $data, string $type = 'array', string $separator = '.', array $context = []): mixed
+    public function undotify(iterable $data, string $type = 'array', string $separator = '.', array $context = []): mixed
     {
         if (!$this->supportsUndotification($data, $type, $context)) {
             throw new NotUndotifiableValueException($data);
         }
 
-        assert(is_iterable($data));
+        $result = self::createInstance($type);
 
-        $result = [];
-        $dot    = new Dot($result, $separator);
+        $dot = new Dot($result, $separator);
 
         foreach ($data as $path => $value) {
-            $dot
-                ->create($path, [])
-                ->set($path, $value);
+            $dot->create($path, $value);
         }
 
         return $result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function supportsDotification(mixed $data, array $context = []): bool
     {
         return is_array($data) || is_object($data);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function supportsUndotification(mixed $data, string $type = 'array', array $context = []): bool
     {
         return is_iterable($data);
+    }
+
+    /**
+     * @return mixed[]|object the created instance
+     */
+    protected static function createInstance(string $type): array|object
+    {
+        $result = [];
+        if ('array' !== $type) {
+            if (!class_exists($type)) {
+                throw new UnsupportedOperationException($type.' is not a valid class name');
+            }
+            $reflectionClass = new ReflectionClass($type);
+            $result          = $reflectionClass->newInstance();
+        }
+
+        return $result;
     }
 }
