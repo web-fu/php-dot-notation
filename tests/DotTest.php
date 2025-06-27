@@ -42,6 +42,7 @@ class DotTest extends TestCase
     public function testGet(array|object $element, string $path, mixed $expected): void
     {
         $dot = new Dot($element);
+
         $this->assertEquals($expected, $dot->get($path));
     }
 
@@ -141,9 +142,11 @@ class DotTest extends TestCase
      */
     public function testGetWithCustomSeparator(): void
     {
-        $element = ['foo' => ['bar' => 1]];
+        $element = ['foo' => ['bar' => 1], 'baz' => ['qux' => ['lol' => 2]]];
         $dot     = new Dot($element, '|');
+
         $this->assertEquals(1, $dot->get('foo|bar'));
+        $this->assertEquals(2, $dot->get('baz|qux|lol'));
     }
 
     /**
@@ -239,6 +242,18 @@ class DotTest extends TestCase
             'path'     => 'object',
             'expected' => (object) ['new' => 'new'],
         ];
+    }
+
+    public function testSetWithCustomSeparator(): void
+    {
+        $element = ['foo' => ['bar' => 1], 'baz' => ['qux' => ['lol' => 2]]];
+
+        $dot = new Dot($element, '|');
+        $dot->set('foo|bar', 3);
+        $this->assertEquals(3, $dot->get('foo|bar'));
+
+        $dot->set('baz|qux|lol', 4);
+        $this->assertEquals(4, $dot->get('baz|qux|lol'));
     }
 
     /**
@@ -477,6 +492,16 @@ class DotTest extends TestCase
             'path'     => 'objectList.0.notExists',
             'expected' => false,
         ];
+    }
+
+    public function testHasWithCustomSeparator(): void
+    {
+        $element = ['foo' => ['bar' => 1], 'baz' => ['qux' => ['lol' => 2]]];
+        $dot     = new Dot($element, '|');
+
+        $this->assertTrue($dot->has('foo|bar'));
+        $this->assertTrue($dot->has('baz|qux|lol'));
+        $this->assertFalse($dot->has('foo|notExists'));
     }
 
     /**
@@ -741,5 +766,34 @@ class DotTest extends TestCase
         $this->expectExceptionMessage('Path `foo` must be an array or an object');
 
         $dot->dot('foo');
+    }
+
+    public function testGetPaths(): void
+    {
+        $element = [
+            'foo' => [
+                'bar' => 1,
+                'baz' => 2,
+                'lol' => [
+                    'nan' => 3,
+                ],
+            ],
+            'qux' => 4,
+        ];
+        $dot = new Dot($element);
+
+        $paths = $dot->getPaths();
+
+        $this->assertContains('foo.bar', $paths);
+        $this->assertContains('foo.baz', $paths);
+        $this->assertContains('qux', $paths);
+
+        $pipe = new Dot($element, '|');
+
+        $pathsPipe = $pipe->getPaths();
+
+        $this->assertContains('foo|bar', $pathsPipe);
+        $this->assertContains('foo|baz', $pathsPipe);
+        $this->assertContains('foo|lol|nan', $pathsPipe);
     }
 }

@@ -58,7 +58,7 @@ class Dot
 
         assert(is_array($value) || is_object($value));
 
-        $next = new self($value);
+        $next = new self($value, $this->separator);
 
         return $next->get(implode($this->separator, $pathTracks));
     }
@@ -99,7 +99,7 @@ class Dot
 
         assert(is_array($newElement) || is_object($newElement));
 
-        $next = new self($newElement);
+        $next = new self($newElement, $this->separator);
 
         $newPath = implode($this->separator, $pathTracks);
 
@@ -138,7 +138,7 @@ class Dot
             return false;
         }
 
-        $next = new self($value);
+        $next = new self($value, $this->separator);
 
         return $next->has(implode($this->separator, $pathTracks));
     }
@@ -282,19 +282,21 @@ class Dot
         $keys  = $this->proxy->getKeys();
 
         foreach ($keys as $key) {
-            if (!$this->isInitialised((string) $key)) {
+            $key = (string) $key;
+
+            if (!$this->isInitialised($key)) {
                 continue;
             }
             $value = $this->proxy->get($key);
 
             if (is_array($value) || is_object($value)) {
-                $next      = new self($value);
+                $next      = new self($value, $this->separator);
                 $nextPaths = $next->getPaths();
                 foreach ($nextPaths as $nextPath) {
                     $paths[] = $key.$this->separator.$nextPath;
                 }
             } else {
-                $paths[] = (string) $key;
+                $paths[] = $key;
             }
 
             unset($value);
