@@ -14,11 +14,12 @@ declare(strict_types=1);
 namespace WebFu\DotNotation\Exception;
 
 use Exception;
+use Throwable;
 
 class PathNotInitialisedException extends Exception
 {
-    public function __construct(string $path)
+    public function __construct(string $path, int $code = 0, Throwable|null $previous = null)
     {
-        parent::__construct('Path `'.$path.'` is not initialised');
+        parent::__construct(sprintf('Path `%s` is not initialised', $path), $code, $previous);
     }
 }

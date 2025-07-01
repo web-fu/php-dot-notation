@@ -19,7 +19,7 @@ use WebFu\DotNotation\Exception\PathNotInitialisedException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\Proxy\Proxy;
 
-final class Dot
+class Dot
 {
     private Proxy $proxy;
 
@@ -58,7 +58,7 @@ final class Dot
 
         assert(is_array($value) || is_object($value));
 
-        $next = new self($value);
+        $next = new self($value, $this->separator);
 
         return $next->get(implode($this->separator, $pathTracks));
     }
@@ -99,7 +99,7 @@ final class Dot
 
         assert(is_array($newElement) || is_object($newElement));
 
-        $next = new self($newElement);
+        $next = new self($newElement, $this->separator);
 
         $newPath = implode($this->separator, $pathTracks);
 
@@ -138,7 +138,7 @@ final class Dot
             return false;
         }
 
-        $next = new self($value);
+        $next = new self($value, $this->separator);
 
         return $next->has(implode($this->separator, $pathTracks));
     }
@@ -260,64 +260,48 @@ final class Dot
      *
      * @return Dot
      */
-    public function dot(string $path): static
+    public function dot(string $path): self
     {
         $result = $this->get($path);
 
         if (is_array($result) || is_object($result)) {
-            return new self($result);
+            return new self($result, $this->separator);
         }
 
         throw new InvalidPathException($path);
     }
 
     /**
-     * Serialize an element and return an array in dot notation.
+     * Return list of all paths.
      *
-     * @param mixed[]|object   $element
-     * @param non-empty-string $separator
-     *
-     * @return mixed[]
+     * @return array<string>
      */
-    public static function dotify(array|object $element, string $prefix = '', string $separator = '.'): array
+    public function getPaths(): array
     {
-        $dot    = new self($element, $separator);
-        $keys   = $dot->proxy->getKeys();
-        $result = [];
+        $paths = [];
+        $keys  = $this->proxy->getKeys();
+
         foreach ($keys as $key) {
-            if (!$dot->isInitialised((string) $key)) {
+            $key = (string) $key;
+
+            if (!$this->isInitialised($key)) {
                 continue;
             }
-            $value = $dot->get((string) $key);
+            $value = $this->proxy->get($key);
+
             if (is_array($value) || is_object($value)) {
-                $result = array_merge($result, self::dotify($value, $prefix.$key.$separator));
+                $next      = new self($value, $this->separator);
+                $nextPaths = $next->getPaths();
+                foreach ($nextPaths as $nextPath) {
+                    $paths[] = $key.$this->separator.$nextPath;
+                }
             } else {
-                $result[$prefix.$key] = $value;
+                $paths[] = $key;
             }
+
+            unset($value);
         }
 
-        return $result;
-    }
-
-    /**
-     * Unserialize an array in dot notation and return an element.
-     *
-     * @param mixed[]          $dotified
-     * @param non-empty-string $separator
-     *
-     * @return mixed[]
-     */
-    public static function undotify(array $dotified, string $separator = '.'): array
-    {
-        $result = [];
-        $dot    = new self($result, $separator);
-
-        foreach ($dotified as $path => $value) {
-            $dot
-                ->create($path, [])
-                ->set($path, $value);
-        }
-
-        return $result;
+        return $paths;
     }
 }

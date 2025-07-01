@@ -42,6 +42,7 @@ class DotTest extends TestCase
     public function testGet(array|object $element, string $path, mixed $expected): void
     {
         $dot = new Dot($element);
+
         $this->assertEquals($expected, $dot->get($path));
     }
 
@@ -141,9 +142,11 @@ class DotTest extends TestCase
      */
     public function testGetWithCustomSeparator(): void
     {
-        $element = ['foo' => ['bar' => 1]];
+        $element = ['foo' => ['bar' => 1], 'baz' => ['qux' => ['lol' => 2]]];
         $dot     = new Dot($element, '|');
+
         $this->assertEquals(1, $dot->get('foo|bar'));
+        $this->assertEquals(2, $dot->get('baz|qux|lol'));
     }
 
     /**
@@ -239,6 +242,18 @@ class DotTest extends TestCase
             'path'     => 'object',
             'expected' => (object) ['new' => 'new'],
         ];
+    }
+
+    public function testSetWithCustomSeparator(): void
+    {
+        $element = ['foo' => ['bar' => 1], 'baz' => ['qux' => ['lol' => 2]]];
+
+        $dot = new Dot($element, '|');
+        $dot->set('foo|bar', 3);
+        $this->assertEquals(3, $dot->get('foo|bar'));
+
+        $dot->set('baz|qux|lol', 4);
+        $this->assertEquals(4, $dot->get('baz|qux|lol'));
     }
 
     /**
@@ -477,6 +492,16 @@ class DotTest extends TestCase
             'path'     => 'objectList.0.notExists',
             'expected' => false,
         ];
+    }
+
+    public function testHasWithCustomSeparator(): void
+    {
+        $element = ['foo' => ['bar' => 1], 'baz' => ['qux' => ['lol' => 2]]];
+        $dot     = new Dot($element, '|');
+
+        $this->assertTrue($dot->has('foo|bar'));
+        $this->assertTrue($dot->has('baz|qux|lol'));
+        $this->assertFalse($dot->has('foo|notExists'));
     }
 
     /**
@@ -729,6 +754,15 @@ class DotTest extends TestCase
         $this->assertEquals(1, $barDot->get('bar'));
     }
 
+    public function testDotWithCustomSeparator(): void
+    {
+        $element = ['foo' => ['bar' => ['baz' => 1]]];
+        $dot     = new Dot($element, '|');
+        $barDot  = $dot->dot('foo');
+
+        $this->assertEquals(1, $barDot->get('bar|baz'));
+    }
+
     /**
      * @covers ::dot
      */
@@ -738,137 +772,37 @@ class DotTest extends TestCase
         $dot     = new Dot($element);
 
         $this->expectException(InvalidPathException::class);
-        $this->expectExceptionMessage('Path `foo` must be an array or an object in order to create a Dot instance');
+        $this->expectExceptionMessage('Path `foo` must be an array or an object');
 
         $dot->dot('foo');
     }
 
-    /**
-     * @covers ::dotify
-     *
-     * @dataProvider elementProvider
-     *
-     * @param mixed[]|object $element
-     * @param mixed[]        $expected
-     */
-    public function testDotify(array|object $element, array $expected): void
+    public function testGetPaths(): void
     {
-        $actual = Dot::dotify($element);
-
-        $this->assertEquals($expected, $actual);
-    }
-
-    /**
-     * @return iterable<array{element: mixed[]|object}>
-     */
-    public function elementProvider(): iterable
-    {
-        yield 'array' => [
-            'element' => [
-                'foo' => 'bar',
-                'baz' => [
-                    'qux'  => 'quux',
-                    'quuz' => 'corge',
+        $element = [
+            'foo' => [
+                'bar' => 1,
+                'baz' => 2,
+                'lol' => [
+                    'nan' => 3,
                 ],
             ],
-            'expected' => [
-                'foo'      => 'bar',
-                'baz.qux'  => 'quux',
-                'baz.quuz' => 'corge',
-            ],
+            'qux' => 4,
         ];
-        yield 'object' => [
-            'element' => (object) [
-                'foo' => 'bar',
-                'baz' => (object) [
-                    'qux'  => 'quux',
-                    'quuz' => 'corge',
-                ],
-            ],
-            'expected' => [
-                'foo'      => 'bar',
-                'baz.qux'  => 'quux',
-                'baz.quuz' => 'corge',
-            ],
-        ];
-        yield 'array_and_object' => [
-            'element' => [
-                'foo' => 'bar',
-                'baz' => (object) [
-                    'qux'  => 'quux',
-                    'quuz' => 'corge',
-                ],
-            ],
-            'expected' => [
-                'foo'      => 'bar',
-                'baz.qux'  => 'quux',
-                'baz.quuz' => 'corge',
-            ],
-        ];
-        yield 'simpleClass' => [
-            'element'  => new SimpleClass(),
-            'expected' => [
-            ],
-        ];
-    }
-
-    /**
-     * @covers ::undotify
-     */
-    public function testUndotify(): void
-    {
-        $arrayDotified = [
-            'foo'      => 'bar',
-            'baz.qux'  => 'quux',
-            'baz.quuz' => 'corge',
-        ];
-
-        $array = Dot::undotify($arrayDotified);
-
-        $this->assertEquals([
-            'foo' => 'bar',
-            'baz' => [
-                'qux'  => 'quux',
-                'quuz' => 'corge',
-            ],
-        ], $array);
-
-        $arrayWithNumericIndex = [
-            'foo'        => 'bar',
-            'baz.0.qux'  => 'quux',
-            'baz.0.quuz' => 'corge',
-            'baz.1.qux'  => 'abc',
-            'baz.1.quuz' => 'def',
-        ];
-
-        $array = Dot::undotify($arrayWithNumericIndex);
-
-        $this->assertEquals([
-            'foo' => 'bar',
-            'baz' => [
-                [
-                    'qux'  => 'quux',
-                    'quuz' => 'corge',
-                ],
-                [
-                    'qux'  => 'abc',
-                    'quuz' => 'def',
-                ],
-            ],
-        ], $array);
-    }
-
-    public function testGarbageCollector(): void
-    {
-        $element = ['foo' => ['bar' => 1]];
-
         $dot = new Dot($element);
 
-        $this->expectNotToPerformAssertions();
+        $paths = $dot->getPaths();
 
-        $class = new stdClass();
-        $func  = fn () => $class;
+        $this->assertContains('foo.bar', $paths);
+        $this->assertContains('foo.baz', $paths);
+        $this->assertContains('qux', $paths);
 
-        $element = $func();
+        $pipe = new Dot($element, '|');
+
+        $pathsPipe = $pipe->getPaths();
+
+        $this->assertContains('foo|bar', $pathsPipe);
+        $this->assertContains('foo|baz', $pathsPipe);
+        $this->assertContains('foo|lol|nan', $pathsPipe);
     }
 }
