@@ -754,6 +754,15 @@ class DotTest extends TestCase
         $this->assertEquals(1, $barDot->get('bar'));
     }
 
+    public function testDotWithCustomSeparator(): void
+    {
+        $element = ['foo' => ['bar' => ['baz' => 1]]];
+        $dot     = new Dot($element, '|');
+        $barDot  = $dot->dot('foo');
+
+        $this->assertEquals(1, $barDot->get('bar|baz'));
+    }
+
     /**
      * @covers ::dot
      */

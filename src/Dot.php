@@ -265,7 +265,7 @@ class Dot
         $result = $this->get($path);
 
         if (is_array($result) || is_object($result)) {
-            return new self($result);
+            return new self($result, $this->separator);
         }
 
         throw new InvalidPathException($path);
