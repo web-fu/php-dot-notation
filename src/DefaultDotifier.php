@@ -74,7 +74,7 @@ class DefaultDotifier implements DotifierInterface, UndotifierInterface
                 throw new UnsupportedOperationException('`'.$type.'` is not a valid class name');
             }
             if (!isset(self::$reflectionClassCache[$type])) {
-                /** @var class-string<T> $type  */
+                /* @var class-string<T> $type */
                 self::$reflectionClassCache[$type] = new ReflectionClass($type);
             }
             $reflectionClass = self::$reflectionClassCache[$type];
