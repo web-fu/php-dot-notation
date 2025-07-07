@@ -22,6 +22,11 @@ use WebFu\Reflection\ReflectionClass;
 class DefaultDotifier implements DotifierInterface, UndotifierInterface
 {
     /**
+     * @var array<class-string, ReflectionClass>
+     */
+    private static array $reflectionClassCache = [];
+
+    /**
      * {@inheritDoc}
      */
     public function dotify(mixed $data, string $separator = '.', array $context = []): array
