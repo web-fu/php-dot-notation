@@ -19,10 +19,13 @@ use WebFu\DotNotation\Exception\NotUndotifiableValueException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\Reflection\ReflectionClass;
 
+/**
+ * @template T of object
+ */
 class DefaultDotifier implements DotifierInterface, UndotifierInterface
 {
     /**
-     * @var array<class-string, ReflectionClass>
+     * @var array<class-string<T>, ReflectionClass<T>>
      */
     private static array $reflectionClassCache = [];
 
@@ -71,6 +74,7 @@ class DefaultDotifier implements DotifierInterface, UndotifierInterface
                 throw new UnsupportedOperationException('`'.$type.'` is not a valid class name');
             }
             if (!isset(self::$reflectionClassCache[$type])) {
+                /** @var class-string<T> $type  */
                 self::$reflectionClassCache[$type] = new ReflectionClass($type);
             }
             $reflectionClass = self::$reflectionClassCache[$type];
