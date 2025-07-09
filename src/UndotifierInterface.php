@@ -18,14 +18,14 @@ interface UndotifierInterface
     /**
      * Denormalize a dot notation array to a normal array or object.
      *
-     * @param iterable<string, mixed> $data      Data to restore
-     * @param string                  $type      Type of the data to restore
-     * @param non-empty-string        $separator Separator to use for dot notation
-     * @param mixed[]                 $context   Context options for the normalization
+     * @param mixed            $data      Data to restore
+     * @param string           $type      Type of the data to restore
+     * @param non-empty-string $separator Separator to use for dot notation
+     * @param mixed[]          $context   Context options for the normalization
      *
      * @return mixed
      */
-    public function undotify(iterable $data, string $type = 'array', string $separator = '.', array $context = []): mixed;
+    public function undotify(mixed $data, string $type = 'array', string $separator = '.', array $context = []): mixed;
 
     /**
      * Check if the data can be undotified.

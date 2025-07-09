@@ -19,8 +19,16 @@ use WebFu\DotNotation\Exception\NotUndotifiableValueException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\Reflection\ReflectionClass;
 
+/**
+ * @template T of object
+ */
 class DefaultDotifier implements DotifierInterface, UndotifierInterface
 {
+    /**
+     * @var array<class-string<T>, ReflectionClass<T>>
+     */
+    private static array $reflectionClassCache = [];
+
     /**
      * {@inheritDoc}
      */
@@ -39,6 +47,9 @@ class DefaultDotifier implements DotifierInterface, UndotifierInterface
 
         $result = [];
         foreach ($paths as $path) {
+            if (!$dot->isInitialised($path)) {
+                continue;
+            }
             $value         = $dot->get($path);
             $result[$path] = $value;
         }
@@ -49,13 +60,26 @@ class DefaultDotifier implements DotifierInterface, UndotifierInterface
     /**
      * {@inheritDoc}
      */
-    public function undotify(iterable $data, string $type = 'array', string $separator = '.', array $context = []): mixed
+    public function undotify(mixed $data, string $type = 'array', string $separator = '.', array $context = []): mixed
     {
         if (!$this->supportsUndotification($data, $type, $context)) {
             throw new NotUndotifiableValueException($data);
         }
 
-        $result = self::createInstance($type);
+        assert(is_iterable($data));
+
+        $result = [];
+        if ('array' !== $type) {
+            if (!class_exists($type)) {
+                throw new UnsupportedOperationException('`'.$type.'` is not a valid class name');
+            }
+            if (!isset(self::$reflectionClassCache[$type])) {
+                /* @phpstan-ignore-next-line */
+                self::$reflectionClassCache[$type] = new ReflectionClass($type);
+            }
+            $reflectionClass = self::$reflectionClassCache[$type];
+            $result          = $reflectionClass->newInstance();
+        }
 
         $dot = new Dot($result, $separator);
 
@@ -80,22 +104,5 @@ class DefaultDotifier implements DotifierInterface, UndotifierInterface
     public function supportsUndotification(mixed $data, string $type = 'array', array $context = []): bool
     {
         return is_iterable($data);
-    }
-
-    /**
-     * @return mixed[]|object the created instance
-     */
-    protected static function createInstance(string $type): array|object
-    {
-        $result = [];
-        if ('array' !== $type) {
-            if (!class_exists($type)) {
-                throw new UnsupportedOperationException($type.' is not a valid class name');
-            }
-            $reflectionClass = new ReflectionClass($type);
-            $result          = $reflectionClass->newInstance();
-        }
-
-        return $result;
     }
 }

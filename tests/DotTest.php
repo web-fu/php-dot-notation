@@ -19,6 +19,7 @@ use WebFu\DotNotation\Dot;
 use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Exception\PathNotInitialisedException;
+use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\DotNotation\Tests\TestData\ChildClass;
 use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
 use WebFu\DotNotation\Tests\TestData\SimpleClass;
@@ -305,6 +306,17 @@ class DotTest extends TestCase
 
         $dot = new Dot($element);
         $dot->set('simple.public', 'new');
+    }
+
+    public function testSetFailsIfPathIsAMethod(): void
+    {
+        $element = new ClassWithComplexProperties();
+
+        $this->expectException(UnsupportedOperationException::class);
+        $this->expectExceptionMessage('Cannot set a class method');
+
+        $dot = new Dot($element);
+        $dot->set('simple.method()', 'new');
     }
 
     /**
@@ -804,5 +816,17 @@ class DotTest extends TestCase
         $this->assertContains('foo|bar', $pathsPipe);
         $this->assertContains('foo|baz', $pathsPipe);
         $this->assertContains('foo|lol|nan', $pathsPipe);
+    }
+
+    public function testGetPathsWithNotInitializedPath(): void
+    {
+        $element = new ClassWithComplexProperties();
+        $dot     = new Dot($element);
+
+        $paths = $dot->getPaths();
+
+        $this->assertContains('simple', $paths);
+        $this->assertContains('union', $paths);
+        $this->assertContains('array', $paths);
     }
 }

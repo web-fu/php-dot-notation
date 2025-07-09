@@ -223,6 +223,13 @@ class Dot
      */
     public function unset(string $path): self
     {
+        if (
+            !$this->has($path)
+            || !$this->isInitialised($path)
+        ) {
+            return $this;
+        }
+
         $pathTracks = explode($this->separator, $path);
 
         if (1 === count($pathTracks)) {
@@ -232,10 +239,6 @@ class Dot
         }
 
         $track = array_shift($pathTracks);
-
-        if (!$this->proxy->isInitialised($track)) {
-            return $this;
-        }
 
         $newElement = $this->proxy->get($track);
 
@@ -285,8 +288,10 @@ class Dot
             $key = (string) $key;
 
             if (!$this->isInitialised($key)) {
+                $paths[] = $key;
                 continue;
             }
+
             $value = $this->proxy->get($key);
 
             if (is_array($value) || is_object($value)) {
