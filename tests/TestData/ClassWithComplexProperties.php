@@ -16,6 +16,13 @@ namespace WebFu\DotNotation\Tests\TestData;
 class ClassWithComplexProperties
 {
     public SimpleClass $simple;
-    public ChildClass|SimpleClass $union;
+    public SimpleClass|OtherSimpleClass $union;
     public array $array;
+
+    public function setUnion(SimpleClass|OtherSimpleClass $union): self
+    {
+        $this->union = $union;
+
+        return $this;
+    }
 }

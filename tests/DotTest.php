@@ -698,6 +698,25 @@ class DotTest extends TestCase
             'element' => new stdClass(),
             'path'    => 'foo.bar',
         ];
+        yield 'recursive' => [
+            'element' => new ClassWithComplexProperties(),
+            'path'    => 'simple.public',
+        ];
+        yield 'recursive-union' => [
+            'element' => (new ClassWithComplexProperties())->setUnion(new SimpleClass()),
+            'path'    => 'simple.union.public',
+        ];
+    }
+
+    public function testCreateFailsIfUndefinedUnion(): void
+    {
+        $element = new ClassWithComplexProperties();
+        $dot     = new Dot($element);
+
+        $this->expectException(UnsupportedOperationException::class);
+        $this->expectExceptionMessage('Cannot create path `simple.union.public` because union is not defined');
+
+        $dot->create('simple.union.public', 'string');
     }
 
     /**
