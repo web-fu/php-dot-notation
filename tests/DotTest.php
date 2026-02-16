@@ -184,7 +184,7 @@ class DotTest extends TestCase
      *
      * @dataProvider setDataProvider
      *
-     * @param mixed[]|object $element
+     * @param object|array<array-key, mixed> $element
      */
     public function testSet(array|object $element, string $path, mixed $expected): void
     {
@@ -282,6 +282,8 @@ class DotTest extends TestCase
         $dot = new Dot($element);
         $dot->set('objectList.0.string', 'test2');
 
+        assert(isset($element->objectList[0]->string));
+
         $this->assertEquals('test2', $element->objectList[0]->string);
 
         // class -> class -> scalar
@@ -324,7 +326,7 @@ class DotTest extends TestCase
      *
      * @dataProvider hasDataProvider
      *
-     * @param mixed[]|object $element
+     * @param object|array<array-key, mixed> $element
      */
     public function testHas(array|object $element, string $path, bool $expected): void
     {
@@ -535,7 +537,7 @@ class DotTest extends TestCase
      *
      * @dataProvider initializedCaseProvider
      *
-     * @param mixed[]|object $element
+     * @param object|array<array-key, mixed> $element
      */
     public function testIsInitialised(object|array $element, string $path, bool $expected): void
     {
@@ -635,7 +637,7 @@ class DotTest extends TestCase
     }
 
     /**
-     * @param mixed[]|object $element
+     * @param object|array<array-key, mixed> $element
      *
      * @dataProvider elementWithoutPathProvider
      */
@@ -650,7 +652,7 @@ class DotTest extends TestCase
     }
 
     /**
-     * @return iterable<array{element: mixed[]|object}>
+     * @return iterable<array{element: object|array<array-key, mixed>}>
      */
     public function elementWithoutPathProvider(): iterable
     {
@@ -665,7 +667,7 @@ class DotTest extends TestCase
     /**
      * @covers ::create
      *
-     * @param mixed[]|object $element
+     * @param object|array<array-key, mixed> $element
      *
      * @dataProvider elementAndPathProvider
      */
@@ -678,7 +680,7 @@ class DotTest extends TestCase
     }
 
     /**
-     * @return iterable<array{element: mixed[]|object, path: string}>
+     * @return iterable<array{element: object|array<array-key, mixed>, path: string}>
      */
     public function elementAndPathProvider(): iterable
     {

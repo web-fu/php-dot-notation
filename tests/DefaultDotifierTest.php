@@ -34,8 +34,8 @@ class DefaultDotifierTest extends TestCase
      *
      * @dataProvider dotifyProvider
      *
-     * @param mixed[]|object $element
-     * @param mixed[]        $expected
+     * @param object|array<array-key, mixed> $element
+     * @param mixed[]                        $expected
      */
     public function testDotify(array|object $element, array $expected): void
     {
@@ -46,7 +46,7 @@ class DefaultDotifierTest extends TestCase
     }
 
     /**
-     * @return iterable<array{element: mixed[]|object}>
+     * @return iterable<array{element: object|array<array-key, mixed>}>
      */
     public function dotifyProvider(): iterable
     {

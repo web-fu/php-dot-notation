@@ -24,8 +24,12 @@ class Dot
     private Proxy $proxy;
 
     /**
-     * @param mixed[]|object   $element
+     * @template T of object|array<array-key, mixed>
+     *
+     * @param T                $element
      * @param non-empty-string $separator
+     *
+     * @param-out T $element
      */
     public function __construct(array|object &$element, private string $separator = '.')
     {
