@@ -19,6 +19,7 @@ use WebFu\DotNotation\Dot;
 use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Exception\PathNotInitialisedException;
+use WebFu\DotNotation\Exception\PathUnionNotDefinedException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\DotNotation\Tests\TestData\ChildClass;
 use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
@@ -38,7 +39,7 @@ class DotTest extends TestCase
      *
      * @dataProvider getDataProvider
      *
-     * @param mixed[]|object $element
+     * @param object|array<array-key, mixed> $element
      */
     public function testGet(array|object $element, string $path, mixed $expected): void
     {
@@ -48,7 +49,7 @@ class DotTest extends TestCase
     }
 
     /**
-     * @return iterable<array{element: mixed[]|object, path: string, expected: mixed}>
+     * @return iterable<array{element: object|array<array-key, mixed>, path: string, expected: mixed}>
      */
     public function getDataProvider(): iterable
     {
@@ -194,7 +195,7 @@ class DotTest extends TestCase
     }
 
     /**
-     * @return iterable<array{element: mixed[]|object, path: string, expected: mixed}>
+     * @return iterable<array{element: object|array<array-key, mixed>, path: string, expected: mixed}>
      */
     public function setDataProvider(): iterable
     {
@@ -336,7 +337,7 @@ class DotTest extends TestCase
     }
 
     /**
-     * @return iterable<array{element: mixed[]|object, path: string, expected: bool}>
+     * @return iterable<array{element: object|array<array-key, mixed>, path: string, expected: bool}>
      */
     public function hasDataProvider(): iterable
     {
@@ -546,7 +547,7 @@ class DotTest extends TestCase
     }
 
     /**
-     * @return iterable<array{element: mixed[]|object, path: string, expected: bool}>
+     * @return iterable<array{element: object|array<array-key, mixed>, path: string, expected: bool}>
      */
     public function initializedCaseProvider(): iterable
     {
@@ -706,7 +707,7 @@ class DotTest extends TestCase
         ];
         yield 'recursive-union' => [
             'element' => (new ClassWithComplexProperties())->setUnion(new SimpleClass()),
-            'path'    => 'simple.union.public',
+            'path'    => 'union.public',
         ];
     }
 
@@ -715,10 +716,10 @@ class DotTest extends TestCase
         $element = new ClassWithComplexProperties();
         $dot     = new Dot($element);
 
-        $this->expectException(UnsupportedOperationException::class);
-        $this->expectExceptionMessage('Cannot create path `simple.union.public` because union is not defined');
+        $this->expectException(PathUnionNotDefinedException::class);
+        $this->expectExceptionMessage('Cannot create path `union.public` because union is not defined');
 
-        $dot->create('simple.union.public', 'string');
+        $dot->create('union.public', 'string');
     }
 
     /**

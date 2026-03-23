@@ -34,8 +34,10 @@ class ReflectionAwareProxy extends Proxy
 
         $reflection = new ReflectionClass($this->element);
 
+        $key = (string) $key;
+
         if ($reflection->hasProperty($key)) {
-            return $reflection->getProperty($key)->getType();
+            return $reflection->getProperty($key)?->getType();
         }
 
         $method = substr($key, 0, -2);
