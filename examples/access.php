@@ -87,3 +87,16 @@ $dot   = new Dot($class);
 $dot->create('foo.baz', 'test');
 echo $class->foo['baz']; // test
 echo PHP_EOL;
+
+// Create with recursion
+class access
+{
+    public string $public;
+}
+$complexClass = new class {
+    public SimpleClass $simple;
+};
+$dot = new Dot($complexClass);
+$dot->create('simple.public', 'test');
+echo $complexClass->simple->public; // test
+echo PHP_EOL;
