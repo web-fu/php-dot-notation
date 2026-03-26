@@ -9,7 +9,7 @@ $finder = (new PhpCsFixer\Finder())
 return (new PhpCsFixer\Config())
     ->setRules([
         '@DoctrineAnnotation'                              => true,
-        '@PHP81Migration'                                  => true,
+        '@PHP8x1Migration'                                 => true,
         '@Symfony'                                         => true,
         'array_syntax'                                     => ['syntax' => 'short'],
         'backtick_to_shell_exec'                           => true,
@@ -50,6 +50,7 @@ return (new PhpCsFixer\Config())
         'list_syntax'                                      => ['syntax' => 'short'],
         'method_chaining_indentation'                      => true,
         'modernize_types_casting'                          => true,
+        'modifier_keywords'                                => true,
         'multiline_comment_opening_closing'                => true,
         'multiline_whitespace_before_semicolons'           => true,
         'no_alias_functions'                               => true,
@@ -100,7 +101,6 @@ return (new PhpCsFixer\Config())
         'string_implicit_backslashes'                      => true,
         'strict_param'                                     => true,
         'ternary_to_null_coalescing'                       => true,
-        'visibility_required'                              => true,
         'void_return'                                      => true,
     ])
     ->setFinder($finder);

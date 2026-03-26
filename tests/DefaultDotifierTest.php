@@ -18,6 +18,7 @@ use WebFu\DotNotation\DefaultDotifier;
 use WebFu\DotNotation\Exception\NotDotifiableValueException;
 use WebFu\DotNotation\Exception\NotUndotifiableValueException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
+use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
 use WebFu\DotNotation\Tests\TestData\ClassWithJsonSerialize;
 use WebFu\DotNotation\Tests\TestData\IterableClass;
 use WebFu\DotNotation\Tests\TestData\LocationDto;
@@ -34,8 +35,8 @@ class DefaultDotifierTest extends TestCase
      *
      * @dataProvider dotifyProvider
      *
-     * @param mixed[]|object $element
-     * @param mixed[]        $expected
+     * @param object|array<array-key, mixed> $element
+     * @param mixed[]                        $expected
      */
     public function testDotify(array|object $element, array $expected): void
     {
@@ -46,7 +47,7 @@ class DefaultDotifierTest extends TestCase
     }
 
     /**
-     * @return iterable<array{element: mixed[]|object}>
+     * @return iterable<array{element: object|array<array-key, mixed>}>
      */
     public function dotifyProvider(): iterable
     {
@@ -181,8 +182,11 @@ class DefaultDotifierTest extends TestCase
      */
     public function undotifyProvider(): iterable
     {
-        $expectedObject         = new SimpleClass();
-        $expectedObject->public = 'test';
+        $simpleObject         = new SimpleClass();
+        $simpleObject->public = 'test';
+
+        $complexObject         = new ClassWithComplexProperties();
+        $complexObject->simple = $simpleObject;
 
         $iterable = function (): iterable {
             yield 'foo' => 'bar';
@@ -233,7 +237,7 @@ class DefaultDotifierTest extends TestCase
                 'public' => 'test',
             ],
             'type'     => SimpleClass::class,
-            'expected' => $expectedObject,
+            'expected' => $simpleObject,
         ];
         yield 'iterable' => [
             'element'  => $iterable(),
@@ -245,6 +249,13 @@ class DefaultDotifierTest extends TestCase
                     'quuz' => 'corge',
                 ],
             ],
+        ];
+        yield 'ComplexClass' => [
+            'element' => [
+                'simple.public' => 'test',
+            ],
+            'type'     => ClassWithComplexProperties::class,
+            'expected' => $complexObject,
         ];
     }
 

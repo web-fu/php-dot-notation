@@ -13,16 +13,12 @@ declare(strict_types=1);
 
 namespace WebFu\DotNotation\Tests\TestData;
 
-class ClassWithComplexProperties
+class OtherSimpleClass
 {
-    public SimpleClass $simple;
-    public SimpleClass|OtherSimpleClass $union;
-    public array $array;
+    public int $number;
 
-    public function setUnion(SimpleClass|OtherSimpleClass $union): self
+    public function method(): int
     {
-        $this->union = $union;
-
-        return $this;
+        return $this->number;
     }
 }

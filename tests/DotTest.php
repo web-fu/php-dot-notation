@@ -19,6 +19,7 @@ use WebFu\DotNotation\Dot;
 use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Exception\PathNotInitialisedException;
+use WebFu\DotNotation\Exception\PathUnionNotDefinedException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\DotNotation\Tests\TestData\ChildClass;
 use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
@@ -38,7 +39,7 @@ class DotTest extends TestCase
      *
      * @dataProvider getDataProvider
      *
-     * @param mixed[]|object $element
+     * @param object|array<array-key, mixed> $element
      */
     public function testGet(array|object $element, string $path, mixed $expected): void
     {
@@ -48,7 +49,7 @@ class DotTest extends TestCase
     }
 
     /**
-     * @return iterable<array{element: mixed[]|object, path: string, expected: mixed}>
+     * @return iterable<array{element: object|array<array-key, mixed>, path: string, expected: mixed}>
      */
     public function getDataProvider(): iterable
     {
@@ -184,7 +185,7 @@ class DotTest extends TestCase
      *
      * @dataProvider setDataProvider
      *
-     * @param mixed[]|object $element
+     * @param object|array<array-key, mixed> $element
      */
     public function testSet(array|object $element, string $path, mixed $expected): void
     {
@@ -194,7 +195,7 @@ class DotTest extends TestCase
     }
 
     /**
-     * @return iterable<array{element: mixed[]|object, path: string, expected: mixed}>
+     * @return iterable<array{element: object|array<array-key, mixed>, path: string, expected: mixed}>
      */
     public function setDataProvider(): iterable
     {
@@ -282,6 +283,8 @@ class DotTest extends TestCase
         $dot = new Dot($element);
         $dot->set('objectList.0.string', 'test2');
 
+        assert(isset($element->objectList[0]->string));
+
         $this->assertEquals('test2', $element->objectList[0]->string);
 
         // class -> class -> scalar
@@ -324,7 +327,7 @@ class DotTest extends TestCase
      *
      * @dataProvider hasDataProvider
      *
-     * @param mixed[]|object $element
+     * @param object|array<array-key, mixed> $element
      */
     public function testHas(array|object $element, string $path, bool $expected): void
     {
@@ -334,7 +337,7 @@ class DotTest extends TestCase
     }
 
     /**
-     * @return iterable<array{element: mixed[]|object, path: string, expected: bool}>
+     * @return iterable<array{element: object|array<array-key, mixed>, path: string, expected: bool}>
      */
     public function hasDataProvider(): iterable
     {
@@ -535,7 +538,7 @@ class DotTest extends TestCase
      *
      * @dataProvider initializedCaseProvider
      *
-     * @param mixed[]|object $element
+     * @param object|array<array-key, mixed> $element
      */
     public function testIsInitialised(object|array $element, string $path, bool $expected): void
     {
@@ -544,7 +547,7 @@ class DotTest extends TestCase
     }
 
     /**
-     * @return iterable<array{element: mixed[]|object, path: string, expected: bool}>
+     * @return iterable<array{element: object|array<array-key, mixed>, path: string, expected: bool}>
      */
     public function initializedCaseProvider(): iterable
     {
@@ -635,7 +638,7 @@ class DotTest extends TestCase
     }
 
     /**
-     * @param mixed[]|object $element
+     * @param object|array<array-key, mixed> $element
      *
      * @dataProvider elementWithoutPathProvider
      */
@@ -650,7 +653,7 @@ class DotTest extends TestCase
     }
 
     /**
-     * @return iterable<array{element: mixed[]|object}>
+     * @return iterable<array{element: object|array<array-key, mixed>}>
      */
     public function elementWithoutPathProvider(): iterable
     {
@@ -665,7 +668,7 @@ class DotTest extends TestCase
     /**
      * @covers ::create
      *
-     * @param mixed[]|object $element
+     * @param object|array<array-key, mixed> $element
      *
      * @dataProvider elementAndPathProvider
      */
@@ -678,7 +681,7 @@ class DotTest extends TestCase
     }
 
     /**
-     * @return iterable<array{element: mixed[]|object, path: string}>
+     * @return iterable<array{element: object|array<array-key, mixed>, path: string}>
      */
     public function elementAndPathProvider(): iterable
     {
@@ -698,6 +701,25 @@ class DotTest extends TestCase
             'element' => new stdClass(),
             'path'    => 'foo.bar',
         ];
+        yield 'recursive' => [
+            'element' => new ClassWithComplexProperties(),
+            'path'    => 'simple.public',
+        ];
+        yield 'recursive-union' => [
+            'element' => (new ClassWithComplexProperties())->setUnion(new SimpleClass()),
+            'path'    => 'union.public',
+        ];
+    }
+
+    public function testCreateFailsIfUndefinedUnion(): void
+    {
+        $element = new ClassWithComplexProperties();
+        $dot     = new Dot($element);
+
+        $this->expectException(PathUnionNotDefinedException::class);
+        $this->expectExceptionMessage('Cannot create path `union.public` because union is not defined');
+
+        $dot->create('union.public', 'string');
     }
 
     /**

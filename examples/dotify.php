@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-use WebFu\DotNotation\Dot;
+use WebFu\DotNotation\DefaultDotifier;
 
 require __DIR__.'/../vendor/autoload.php';
 
@@ -21,12 +21,31 @@ $array = [
         'bar' => 'test',
     ],
 ];
-$dotified = Dot::dotify($array);
+$dotified = (new DefaultDotifier())->dotify($array);
 
 echo $dotified['foo.bar']; // test
 echo PHP_EOL;
 
 // Turning a dotified array into a normal array
-$normal = Dot::undotify($dotified);
+$normal = (new DefaultDotifier())->undotify($dotified);
 
 echo $normal['foo']['bar']; // test
+echo PHP_EOL;
+
+// Turning a dotified array into an object
+class SimpleClass
+{
+    public string $public;
+}
+
+class ComplexClass
+{
+    public SimpleClass $simple;
+}
+
+$array = [
+    'simple.public' => 'test',
+];
+$object = (new DefaultDotifier())->undotify($array, ComplexClass::class);
+echo $object->simple->public;
+echo PHP_EOL;

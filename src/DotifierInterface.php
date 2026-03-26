@@ -21,9 +21,9 @@ interface DotifierInterface
     /**
      * Normalize an array or object to a dot notation array.
      *
-     * @param mixed[]|object   $data      Object or array to normalize
-     * @param non-empty-string $separator Separator to use for dot notation
-     * @param mixed[]          $context   Context options for the normalization
+     * @param object|array<array-key, mixed> $data      Object or array to normalize
+     * @param non-empty-string               $separator Separator to use for dot notation
+     * @param mixed[]                        $context   Context options for the normalization
      *
      * @throws NotDotifiableValueException If the value cannot be dotified
      *

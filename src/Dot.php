@@ -16,20 +16,25 @@ namespace WebFu\DotNotation;
 use WebFu\DotNotation\Exception\InvalidPathException;
 use WebFu\DotNotation\Exception\PathNotFoundException;
 use WebFu\DotNotation\Exception\PathNotInitialisedException;
+use WebFu\DotNotation\Exception\PathUnionNotDefinedException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\Proxy\Proxy;
 
 class Dot
 {
-    private Proxy $proxy;
+    private ReflectionAwareProxy $proxy;
 
     /**
-     * @param mixed[]|object   $element
+     * @template T of object|array<array-key, mixed>
+     *
+     * @param T                $element
      * @param non-empty-string $separator
+     *
+     * @param-out T $element
      */
     public function __construct(array|object &$element, private string $separator = '.')
     {
-        $this->proxy = new Proxy($element);
+        $this->proxy = new ReflectionAwareProxy($element);
     }
 
     /**
@@ -165,6 +170,10 @@ class Dot
             return false;
         }
 
+        if (str_ends_with($track, '()')) {
+            return true;
+        }
+
         $value = $this->proxy->get($track);
 
         if (!count($pathTracks)) {
@@ -200,6 +209,18 @@ class Dot
 
         if (!$this->proxy->has($track)) {
             $this->proxy->create($track, []);
+        }
+
+        if (!$this->proxy->isInitialised($track)) {
+            $type = $this->proxy->getReflectionType($track);
+
+            assert(null !== $type);
+
+            if ($type->isUnionType()) {
+                throw new PathUnionNotDefinedException($path);
+            }
+            $className = $type->getTypeNames()[0];
+            $this->proxy->create($track, new $className($value));
         }
 
         $nextElement = $this->proxy->get($track);
@@ -287,7 +308,9 @@ class Dot
         foreach ($keys as $key) {
             $key = (string) $key;
 
-            if (!$this->isInitialised($key)) {
+            if (!$this->isInitialised($key)
+                || str_ends_with($key, '()')
+            ) {
                 $paths[] = $key;
                 continue;
             }
