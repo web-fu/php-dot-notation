@@ -32,7 +32,7 @@ echo $array['foo']['bar']; // baz
 echo PHP_EOL;
 
 // Accessing an object
-$class = new class() {
+$class = new class {
     public string $property = 'test';
 
     public object $object;
@@ -89,4 +89,4 @@ echo $class->foo['baz']; // test
 echo PHP_EOL;
 
 // Listing all public properties of an object or accessing all values of an array
-var_dump($dot->all()); //array(1) { ["foo.baz"]=> string(4) "test" }
+var_dump($dot->all()); // array(1) { ["foo.baz"]=> string(4) "test" }
