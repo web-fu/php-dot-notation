@@ -332,4 +332,28 @@ class Dot
 
         return $paths;
     }
+
+    /**
+     * Return all paths and their values.
+     *
+     * @return array<string, mixed>
+     */
+    public function all(): array
+    {
+        $paths = $this->getPaths();
+
+        $result = [];
+        foreach ($paths as $path) {
+            if (!$this->isInitialised($path)) {
+                continue;
+            }
+            if (str_ends_with($path, '()')) {
+                continue;
+            }
+
+            $result[$path] = $this->get($path);
+        }
+
+        return $result;
+    }
 }

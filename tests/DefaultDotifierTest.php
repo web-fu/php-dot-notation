@@ -22,6 +22,7 @@ use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
 use WebFu\DotNotation\Tests\TestData\ClassWithJsonSerialize;
 use WebFu\DotNotation\Tests\TestData\IterableClass;
 use WebFu\DotNotation\Tests\TestData\LocationDto;
+use WebFu\DotNotation\Tests\TestData\OtherSimpleClass;
 use WebFu\DotNotation\Tests\TestData\PersonDto;
 use WebFu\DotNotation\Tests\TestData\SimpleClass;
 
@@ -59,6 +60,13 @@ class DefaultDotifierTest extends TestCase
         $personDto->location->city     = 'New York';
         $personDto->location->province = 'NY';
         $personDto->location->country  = 'USA';
+
+        $complex                 = new ClassWithComplexProperties();
+        $complex->simple         = new SimpleClass();
+        $complex->simple->public = 'public value';
+        $complex->union          = new OtherSimpleClass();
+        $complex->union->number  = 1;
+        $complex->array          = ['value1', 'value2'];
 
         yield 'array' => [
             'element' => [
@@ -122,6 +130,15 @@ class DefaultDotifierTest extends TestCase
                 'location.city'     => 'New York',
                 'location.province' => 'NY',
                 'location.country'  => 'USA',
+            ],
+        ];
+        yield 'complex' => [
+            'element'  => $complex,
+            'expected' => [
+                'simple.public' => 'public value',
+                'union.number'  => 1,
+                'array.0'       => 'value1',
+                'array.1'       => 'value2',
             ],
         ];
     }

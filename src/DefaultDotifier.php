@@ -42,19 +42,9 @@ class DefaultDotifier implements DotifierInterface, UndotifierInterface
             $data = $data->jsonSerialize();
         }
 
-        $dot   = new Dot($data, $separator);
-        $paths = $dot->getPaths();
+        $dot = new Dot($data, $separator);
 
-        $result = [];
-        foreach ($paths as $path) {
-            if (!$dot->isInitialised($path)) {
-                continue;
-            }
-            $value         = $dot->get($path);
-            $result[$path] = $value;
-        }
-
-        return $result;
+        return $dot->all();
     }
 
     /**

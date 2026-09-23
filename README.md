@@ -50,6 +50,9 @@ echo $dot->get('method()'); //foo
 // Setting a value in an object
 $dot->set('property', 'baz');
 echo $class->property; //baz
+
+// Listing all public properties of an object or accessing all values of an array
+var_dump($dot->all()); //array(1) { ["foo.baz"]=> string(4) "test" }
 ```
 
 ## Creating a new path
@@ -138,6 +141,21 @@ $class = new class() {
 
 $dot = new Dot($class);
 echo $dot->get('iDoSomething()'); // I Do Something 0
+```
+
+### Function all() does not return methods
+This is a design decision to avoid executing methods when calling `all()`.
+```php
+$class = new class() {
+    public string $property = 'test';
+    public function iDoSomething(): int {
+        echo 'I Do Something ';
+        return 0;
+    }
+};
+
+$dot = new Dot($class);
+var_dump($dot->all()); //array(1) { ["property"]=> string(4) "test"
 ```
 
 ### It's not possible to access private or protected properties

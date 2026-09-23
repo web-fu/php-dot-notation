@@ -23,6 +23,7 @@ use WebFu\DotNotation\Exception\PathUnionNotDefinedException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\DotNotation\Tests\TestData\ChildClass;
 use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
+use WebFu\DotNotation\Tests\TestData\OtherSimpleClass;
 use WebFu\DotNotation\Tests\TestData\SimpleClass;
 use WebFu\Reflection\ReflectionClass;
 use WebFu\Reflection\ReflectionProperty;
@@ -850,5 +851,43 @@ class DotTest extends TestCase
         $this->assertContains('simple', $paths);
         $this->assertContains('union', $paths);
         $this->assertContains('array', $paths);
+    }
+
+    public function testAll(): void
+    {
+        $complex                 = new ClassWithComplexProperties();
+        $complex->simple         = new SimpleClass();
+        $complex->simple->public = 'public value';
+        $complex->union          = new OtherSimpleClass();
+        $complex->union->number  = 1;
+        $complex->array          = ['value1', 'value2'];
+
+        $element = [
+            'foo' => [
+                'bar' => 1,
+                'baz' => 2,
+                'lol' => [
+                    'nan' => 3,
+                ],
+            ],
+            'qux'     => 4,
+            'complex' => $complex,
+        ];
+        $dot = new Dot($element);
+
+        $all = $dot->all();
+
+        $expected = [
+            'foo.bar'               => 1,
+            'foo.baz'               => 2,
+            'foo.lol.nan'           => 3,
+            'qux'                   => 4,
+            'complex.simple.public' => 'public value',
+            'complex.union.number'  => 1,
+            'complex.array.0'       => 'value1',
+            'complex.array.1'       => 'value2',
+        ];
+
+        $this->assertEquals($expected, $all);
     }
 }
