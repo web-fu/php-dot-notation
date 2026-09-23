@@ -40,7 +40,7 @@ return (new PhpCsFixer\Config())
         'global_namespace_import'                          => ['import_classes' => true],
         'header_comment'                                   => [
             'comment_type' => 'PHPDoc',
-            'header'       => "This file is part of web-fu/php-dot-notation\n\n@copyright Web-Fu <info@web-fu.it>\n\nFor the full copyright and license information, please view the LICENSE\nfile that was distributed with this source code.",
+            'header'       => "This file is part of web-fu/php-dot-notation\n\n@copyright Web-Fu <info@web-fu.it>\n\nFor the full copyright and license information, please view the LICENSE.md\nfile that was distributed with this source code.",
         ],
         'heredoc_indentation'                              => true,
         'heredoc_to_nowdoc'                                => true,

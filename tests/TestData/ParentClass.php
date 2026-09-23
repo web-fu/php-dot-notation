@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @copyright Web-Fu <info@web-fu.it>
  *
- * For the full copyright and license information, please view the LICENSE
+ * For the full copyright and license information, please view the LICENSE.md
  * file that was distributed with this source code.
  */
 
