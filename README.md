@@ -1,10 +1,9 @@
 PHP Dot Notation
 ==============================================================================================
-[![Latest Stable Version](https://poser.pugx.org/web-fu/php-dot-notation/v)](https://packagist.org/packages/web-fu/php-dot-notation)
-[![PHP Version Require](https://poser.pugx.org/web-fu/php-dot-notation/require/php)](https://packagist.org/packages/web-fu/php-dot-notation)
-![Test status](https://github.com/web-fu/php-dot-notation/actions/workflows/tests.yaml/badge.svg)
-![Static analysis status](https://github.com/web-fu/php-dot-notation/actions/workflows/static-analysis.yml/badge.svg)
-![Code style status](https://github.com/web-fu/php-dot-notation/actions/workflows/code-style.yaml/badge.svg)
+![GitHub Release](https://img.shields.io/github/v/release/web-fu/php-dot-notation?label=stable&style=for-the-badge)
+[![PHP 8.0 -- 8.5](https://img.shields.io/badge/PHP-8.0%20--%208.5-777BB4?style=for-the-badge)](https://packagist.org/packages/web-fu/php-dot-notation)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/web-fu/php-dot-notation/tests.yaml?style=for-the-badge&label=Tests)
+[![License](https://img.shields.io/packagist/l/web-fu/php-dot-notation?style=for-the-badge)](LICENSE.md)
 
 ### A library that allows to access objects and arrays using Dot Notation
 
