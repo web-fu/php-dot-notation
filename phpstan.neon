@@ -5,5 +5,7 @@ parameters:
     paths:
         - src
         - tests
+    stubFiles:
+        - .config/phpstan-proxy.stub.php
     excludePaths:
         - tests/TestData

@@ -1,10 +1,9 @@
 PHP Dot Notation
 ==============================================================================================
-[![Latest Stable Version](https://poser.pugx.org/web-fu/php-dot-notation/v)](https://packagist.org/packages/web-fu/php-dot-notation)
-[![PHP Version Require](https://poser.pugx.org/web-fu/php-dot-notation/require/php)](https://packagist.org/packages/web-fu/php-dot-notation)
-![Test status](https://github.com/web-fu/php-dot-notation/actions/workflows/tests.yaml/badge.svg)
-![Static analysis status](https://github.com/web-fu/php-dot-notation/actions/workflows/static-analysis.yml/badge.svg)
-![Code style status](https://github.com/web-fu/php-dot-notation/actions/workflows/code-style.yaml/badge.svg)
+![GitHub Release](https://img.shields.io/github/v/release/web-fu/php-dot-notation?label=stable&style=for-the-badge)
+[![PHP 8.0 -- 8.5](https://img.shields.io/badge/PHP-8.0%20--%208.5-777BB4?style=for-the-badge)](https://packagist.org/packages/web-fu/php-dot-notation)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/web-fu/php-dot-notation/tests.yaml?style=for-the-badge&label=Tests)
+[![License](https://img.shields.io/packagist/l/web-fu/php-dot-notation?style=for-the-badge)](LICENSE.md)
 
 ### A library that allows to access objects and arrays using Dot Notation
 
@@ -50,6 +49,9 @@ echo $dot->get('method()'); //foo
 // Setting a value in an object
 $dot->set('property', 'baz');
 echo $class->property; //baz
+
+// Listing all public properties of an object or accessing all values of an array
+var_dump($dot->all()); //array(1) { ["foo.baz"]=> string(4) "test" }
 ```
 
 ## Creating a new path
@@ -138,6 +140,21 @@ $class = new class() {
 
 $dot = new Dot($class);
 echo $dot->get('iDoSomething()'); // I Do Something 0
+```
+
+### Function all() does not return methods
+This is a design decision to avoid executing methods when calling `all()`.
+```php
+$class = new class() {
+    public string $property = 'test';
+    public function iDoSomething(): int {
+        echo 'I Do Something ';
+        return 0;
+    }
+};
+
+$dot = new Dot($class);
+var_dump($dot->all()); //array(1) { ["property"]=> string(4) "test"
 ```
 
 ### It's not possible to access private or protected properties

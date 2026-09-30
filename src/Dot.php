@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @copyright Web-Fu <info@web-fu.it>
  *
- * For the full copyright and license information, please view the LICENSE
+ * For the full copyright and license information, please view the LICENSE.md
  * file that was distributed with this source code.
  */
 
@@ -180,6 +180,8 @@ class Dot
             return true;
         }
 
+        assert(is_array($value) || is_object($value));
+
         $next = new self($value);
 
         return $next->isInitialised(implode($this->separator, $pathTracks));
@@ -224,6 +226,8 @@ class Dot
         }
 
         $nextElement = $this->proxy->get($track);
+
+        assert(is_array($nextElement) || is_object($nextElement));
 
         $nextDot = new self($nextElement);
 
@@ -331,5 +335,29 @@ class Dot
         }
 
         return $paths;
+    }
+
+    /**
+     * Return all paths and their values.
+     *
+     * @return array<string, mixed>
+     */
+    public function all(): array
+    {
+        $paths = $this->getPaths();
+
+        $result = [];
+        foreach ($paths as $path) {
+            if (!$this->isInitialised($path)) {
+                continue;
+            }
+            if (str_ends_with($path, '()')) {
+                continue;
+            }
+
+            $result[$path] = $this->get($path);
+        }
+
+        return $result;
     }
 }

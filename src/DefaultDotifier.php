@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @copyright Web-Fu <info@web-fu.it>
  *
- * For the full copyright and license information, please view the LICENSE
+ * For the full copyright and license information, please view the LICENSE.md
  * file that was distributed with this source code.
  */
 
@@ -42,19 +42,11 @@ class DefaultDotifier implements DotifierInterface, UndotifierInterface
             $data = $data->jsonSerialize();
         }
 
-        $dot   = new Dot($data, $separator);
-        $paths = $dot->getPaths();
+        assert(is_array($data) || is_object($data));
 
-        $result = [];
-        foreach ($paths as $path) {
-            if (!$dot->isInitialised($path)) {
-                continue;
-            }
-            $value         = $dot->get($path);
-            $result[$path] = $value;
-        }
+        $dot = new Dot($data, $separator);
 
-        return $result;
+        return $dot->all();
     }
 
     /**

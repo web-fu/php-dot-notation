@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @copyright Web-Fu <info@web-fu.it>
  *
- * For the full copyright and license information, please view the LICENSE
+ * For the full copyright and license information, please view the LICENSE.md
  * file that was distributed with this source code.
  */
 
@@ -23,6 +23,7 @@ use WebFu\DotNotation\Exception\PathUnionNotDefinedException;
 use WebFu\DotNotation\Exception\UnsupportedOperationException;
 use WebFu\DotNotation\Tests\TestData\ChildClass;
 use WebFu\DotNotation\Tests\TestData\ClassWithComplexProperties;
+use WebFu\DotNotation\Tests\TestData\OtherSimpleClass;
 use WebFu\DotNotation\Tests\TestData\SimpleClass;
 use WebFu\Reflection\ReflectionClass;
 use WebFu\Reflection\ReflectionProperty;
@@ -280,7 +281,8 @@ class DotTest extends TestCase
             }
         };
 
-        $dot = new Dot($element);
+        $subject = $element;
+        $dot     = new Dot($subject);
         $dot->set('objectList.0.string', 'test2');
 
         assert(isset($element->objectList[0]->string));
@@ -288,13 +290,14 @@ class DotTest extends TestCase
         $this->assertEquals('test2', $element->objectList[0]->string);
 
         // class -> class -> scalar
-        $element = new ClassWithComplexProperties();
+        $complex = new ClassWithComplexProperties();
 
-        $dot = new Dot($element);
+        $dot = new Dot($complex);
         $dot->set('simple', new SimpleClass());
         $dot->set('simple.public', 'new');
 
-        $this->assertEquals('new', $element->simple->public);
+        $this->assertInstanceOf(SimpleClass::class, $complex->simple);
+        $this->assertEquals('new', $complex->simple->public);
     }
 
     /**
@@ -727,13 +730,13 @@ class DotTest extends TestCase
      */
     public function testUnset(): void
     {
-        $element = ['foo' => 1];
-        $dot     = new Dot($element);
+        $subject = ['foo' => 1];
+        $dot     = new Dot($subject);
         $dot->unset('foo');
 
-        $this->assertArrayNotHasKey('foo', $element);
+        $this->assertArrayNotHasKey('foo', $subject);
 
-        $test = new class {
+        $subject = new class {
             /**
              * @var string[]
              */
@@ -742,10 +745,10 @@ class DotTest extends TestCase
             ];
         };
 
-        $dot = new Dot($test);
+        $dot = new Dot($subject);
         $dot->unset('array.foo');
 
-        $this->assertArrayNotHasKey('foo', $test->array);
+        $this->assertArrayNotHasKey('foo', $subject->array);
     }
 
     /**
@@ -766,7 +769,8 @@ class DotTest extends TestCase
     public function testUnsetDoesNotChangeIfNotInitialized(): void
     {
         $element = new SimpleClass();
-        $dot     = new Dot($element);
+        $subject = $element;
+        $dot     = new Dot($subject);
         $dot->unset('public');
 
         $reflection         = new ReflectionClass($element);
@@ -850,5 +854,43 @@ class DotTest extends TestCase
         $this->assertContains('simple', $paths);
         $this->assertContains('union', $paths);
         $this->assertContains('array', $paths);
+    }
+
+    public function testAll(): void
+    {
+        $complex                 = new ClassWithComplexProperties();
+        $complex->simple         = new SimpleClass();
+        $complex->simple->public = 'public value';
+        $complex->union          = new OtherSimpleClass();
+        $complex->union->number  = 1;
+        $complex->array          = ['value1', 'value2'];
+
+        $element = [
+            'foo' => [
+                'bar' => 1,
+                'baz' => 2,
+                'lol' => [
+                    'nan' => 3,
+                ],
+            ],
+            'qux'     => 4,
+            'complex' => $complex,
+        ];
+        $dot = new Dot($element);
+
+        $all = $dot->all();
+
+        $expected = [
+            'foo.bar'               => 1,
+            'foo.baz'               => 2,
+            'foo.lol.nan'           => 3,
+            'qux'                   => 4,
+            'complex.simple.public' => 'public value',
+            'complex.union.number'  => 1,
+            'complex.array.0'       => 'value1',
+            'complex.array.1'       => 'value2',
+        ];
+
+        $this->assertEquals($expected, $all);
     }
 }
