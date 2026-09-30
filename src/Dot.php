@@ -180,6 +180,8 @@ class Dot
             return true;
         }
 
+        assert(is_array($value) || is_object($value));
+
         $next = new self($value);
 
         return $next->isInitialised(implode($this->separator, $pathTracks));
@@ -224,6 +226,8 @@ class Dot
         }
 
         $nextElement = $this->proxy->get($track);
+
+        assert(is_array($nextElement) || is_object($nextElement));
 
         $nextDot = new self($nextElement);
 

@@ -281,7 +281,8 @@ class DotTest extends TestCase
             }
         };
 
-        $dot = new Dot($element);
+        $subject = $element;
+        $dot     = new Dot($subject);
         $dot->set('objectList.0.string', 'test2');
 
         assert(isset($element->objectList[0]->string));
@@ -289,13 +290,14 @@ class DotTest extends TestCase
         $this->assertEquals('test2', $element->objectList[0]->string);
 
         // class -> class -> scalar
-        $element = new ClassWithComplexProperties();
+        $complex = new ClassWithComplexProperties();
 
-        $dot = new Dot($element);
+        $dot = new Dot($complex);
         $dot->set('simple', new SimpleClass());
         $dot->set('simple.public', 'new');
 
-        $this->assertEquals('new', $element->simple->public);
+        $this->assertInstanceOf(SimpleClass::class, $complex->simple);
+        $this->assertEquals('new', $complex->simple->public);
     }
 
     /**
@@ -729,7 +731,8 @@ class DotTest extends TestCase
     public function testUnset(): void
     {
         $element = ['foo' => 1];
-        $dot     = new Dot($element);
+        $subject = $element;
+        $dot     = new Dot($subject);
         $dot->unset('foo');
 
         $this->assertArrayNotHasKey('foo', $element);
@@ -743,7 +746,8 @@ class DotTest extends TestCase
             ];
         };
 
-        $dot = new Dot($test);
+        $subject = $test;
+        $dot     = new Dot($subject);
         $dot->unset('array.foo');
 
         $this->assertArrayNotHasKey('foo', $test->array);
@@ -767,7 +771,8 @@ class DotTest extends TestCase
     public function testUnsetDoesNotChangeIfNotInitialized(): void
     {
         $element = new SimpleClass();
-        $dot     = new Dot($element);
+        $subject = $element;
+        $dot     = new Dot($subject);
         $dot->unset('public');
 
         $reflection         = new ReflectionClass($element);

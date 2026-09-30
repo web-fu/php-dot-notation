@@ -42,6 +42,8 @@ class DefaultDotifier implements DotifierInterface, UndotifierInterface
             $data = $data->jsonSerialize();
         }
 
+        assert(is_array($data) || is_object($data));
+
         $dot = new Dot($data, $separator);
 
         return $dot->all();
