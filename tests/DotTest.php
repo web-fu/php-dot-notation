@@ -730,14 +730,13 @@ class DotTest extends TestCase
      */
     public function testUnset(): void
     {
-        $element = ['foo' => 1];
-        $subject = $element;
+        $subject = ['foo' => 1];
         $dot     = new Dot($subject);
         $dot->unset('foo');
 
-        $this->assertArrayNotHasKey('foo', $element);
+        $this->assertArrayNotHasKey('foo', $subject);
 
-        $test = new class {
+        $subject = new class {
             /**
              * @var string[]
              */
@@ -746,11 +745,10 @@ class DotTest extends TestCase
             ];
         };
 
-        $subject = $test;
-        $dot     = new Dot($subject);
+        $dot = new Dot($subject);
         $dot->unset('array.foo');
 
-        $this->assertArrayNotHasKey('foo', $test->array);
+        $this->assertArrayNotHasKey('foo', $subject->array);
     }
 
     /**
